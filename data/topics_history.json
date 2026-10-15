@@ -1,0 +1,104 @@
+{
+  "topics": [
+    {
+      "id": "intro-sample",
+      "date": "2026-10-12",
+      "title": "Why is the Sky Blue? / 3lash s-sma zer9a?",
+      "category": "Science & Nature",
+      "summary": "Leo and Mia explore how sunlight interacts with the atmosphere in a simple and fun way.",
+      "environment": "Sunny outdoor park with fluffy clouds",
+      "outfits": "Leo in bright yellow polo and shorts; Mia with sunny aviator cap"
+    },
+    {
+      "id": "water-cycle-rain",
+      "date": "2026-10-12",
+      "title": "Where Does Rain Come From? / Mnin katji chta?",
+      "category": "Science & Nature",
+      "summary": "Water evaporates, forms clouds, and falls as rain",
+      "environment": "Lush vibrant forest trail with friendly smiling rain cloud",
+      "outfits": "Leo: Bright yellow hooded raincoat, blue denim trousers, green waterproof rubber boots; Mia: Cute little waterproof detective cape and yellow boots"
+    },
+    {
+      "topic_key": "water-cycle-rain",
+      "date": "2026-10-12",
+      "title": "مِنْ أَيْنَ يَأْتِي المَطَر؟ 🌧️",
+      "title_en": "Where Does Rain Come From?",
+      "category": "العلوم والطبيعة (Science & Nature)",
+      "summary": "تتبخر قطرات الماء وتصعد إلى السماء لتكوّن السحب، ثم تهطل أمطاراً تسقي الزرع",
+      "environment": "Lush vibrant forest trail with friendly smiling rain cloud and colourful flowers",
+      "outfits": "Leo: Bright yellow hooded raincoat, blue denim trousers, green waterproof rubber boots; Mia: Cute little waterproof cape and tiny yellow boots"
+    },
+    {
+      "topic_key": "dental-hygiene",
+      "date": "2026-10-12",
+      "title": "مُغَامَرَةُ بَطَلِ الأَسْنَانِ السِّحْرِيَّة 🪥✨",
+      "title_en": "The Magical Toothbrush Adventure",
+      "category": "العادات الصحية (Healthy Habits)",
+      "summary": "تنظيف الأسنان مرتين باليوم يحميها من سوسة الأسنان ويبقيها ناصعة البياض",
+      "environment": "Giant colorful fantasy Kingdom of Sparkling Clean White Teeth with bubbles",
+      "outfits": "Leo: Superhero clean white cape with a sparkling tooth crest badge; Mia: Mini toothbrush fairy wand and safety goggles"
+    },
+    {
+      "topic_key": "polite-words-magic",
+      "date": "2026-10-13",
+      "pillar": "الآداب والأخلاق (Manners)",
+      "title": "سِحْرُ الكَلِمَاتِ الطَّيِّبَة: مِنْ فَضْلِكَ وَشُكْرًا ✨",
+      "lesson": "طلب الأشياء بأدب وتقديم الشكر يزرع المحبة بين الجميع.",
+      "video_url": "https://youtu.be/U8naHvzJQJo",
+      "status": "private_draft"
+    },
+    {
+      "topic_key": "respecting-parents",
+      "date": "2026-10-13",
+      "pillar": "الآداب والأخلاق (Manners)",
+      "title": "بِرُّ الوَالِدَيْن: أُمِّي وَأَبِي تَاجُ رَأْسِي ❤️",
+      "lesson": "طاعة الوالدين وإسعادهما واجب وأجمل عمل يقوم به الطفل الصالح.",
+      "video_url": "https://youtu.be/GbjQnkELQmo",
+      "status": "private_draft"
+    },
+    {
+      "topic_key": "saying-sorry-honesty",
+      "date": "2026-10-15",
+      "pillar": "الآداب والأخلاق (Manners)",
+      "title": "شَجَاعَةُ الاِعْتِذَارِ وَقَوْلُ الصِّدْق 🤝",
+      "lesson": "الصدق فضيلة وشجاعة، والاعتذار عند الخطأ خلق رفيع.",
+      "video_url": "https://youtu.be/qFnWc46PvX8",
+      "status": "private_draft"
+    },
+    {
+      "topic_key": "التعاون_ومساعدة_الأصدقاء",
+      "date": "2026-10-15",
+      "pillar": "الآداب والأخلاق (Manners)",
+      "title": "لَيْثُ يُعَلِّمُنَا قُوَّةَ التَّعَاوُنِ 🦁🤝",
+      "lesson": "التَّعَاوُنُ مَعَ الأَصْدِقَاءِ يُحَقِّقُ النَّجَاحَ وَيَنْشُرُ الْمَحَبَّةَ بَيْنَ النَّاسِ.",
+      "video_url": null,
+      "status": "studio_draft",
+      "qa_score": 100
+    },
+    {
+      "topic_key": "sharing-is-caring",
+      "date": "2026-10-15",
+      "pillar": "الآداب والأخلاق (Manners)",
+      "title": "مُشَارَكَةُ الأَلْعَاب: فَرَحَةُ العَطَاءِ 🧸🎁",
+      "lesson": "مشاركة الألعاب تعزز الصداقة وتزرع روح العطاء والمحبة بين الأطفال.",
+      "video_url": "https://youtu.be/iXjoILiMqGw",
+      "status": "private_draft"
+    },
+    {
+      "topic_key": "arabic-letters-alif-baa",
+      "date": "2026-10-15",
+      "pillar": "اللغة العربية والروض (Alphabet)",
+      "title": "قِطَارُ الحُرُوف: حَرْفُ الأَلِفِ وَالبَاء 🚂🔤",
+      "lesson": "التعرف على حرفي الألف والباء بنطق سليم وكلمات مصورة للأطفال.",
+      "video_url": "https://youtu.be/s2AtgmGD0bA",
+      "status": "private_draft"
+    }
+  ],
+  "categories_pool": [
+    "Science & Nature (Space, Ocean, Weather, Animals)",
+    "Everyday Good Habits (Brushing teeth, tidying toys, healthy eating)",
+    "Social & Emotional Learning (Kindness, sharing, managing anger, teamwork)",
+    "Fun Learning (Numbers, alphabet, colors, shapes, puzzles)",
+    "Safety Rules (Crossing the road, talking to strangers, fire safety)"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "language": "Modern Standard Arabic (العربية الفصحى المبسطة للأطفال)",
+  "characters": [
+    {
+      "id": "leo",
+      "name_ar": "ليث (Leo)",
+      "name_en": "Leo",
+      "role": "ولد صغير شجاع ومحب للاستكشاف (6 سنوات)",
+      "age_appearance": "6 years old",
+      "base_visual_traits": "Pixar/Disney 3D animation style, big warm brown eyes, messy curly brown hair, cheerful energetic smile, expressive animated face",
+      "personality": "كثير التساؤل والفضول، يحب التعلم والمغامرة، يتحدث بلغة عربية فصحى مشجعة وواضحة للأطفال",
+      "style_notes": "الملامح والوجه والشعر ثابتة 100%. فقط الملابس (الزي) والخلفية تتغير حسب موضوع اليوم."
+    },
+    {
+      "id": "mia",
+      "name_ar": "ميا (Mia)",
+      "name_en": "Mia",
+      "role": "الصديقة اللطيفة والذكية والمساعدة في الشرح",
+      "age_appearance": "Cute companion",
+      "base_visual_traits": "Pixar/Disney 3D animation style, adorable smart sidekick, big expressive eyes, friendly demeanor",
+      "personality": "تشرح المعلومات العلمية والأخلاقية بأسلوب مرح وبسيط ومحبب",
+      "style_notes": "ترافق ليث في كل حلقة مع إكسسوارات متناسقة مع موضوع الحلقة."
+    }
+  ],
+  "visual_style": {
+    "art_style": "3D Pixar / Disney animated film style, vibrant cheerful colors, soft cinematic studio lighting, ultra-detailed textures, kid-friendly and warm",
+    "aspect_ratio": "9:16 for Shorts / 16:9 for Standard",
+    "theme_adaptation_rules": "For every new theme, keep character facial identity fixed. Change: (1) Outfits/Costumes, (2) Environment/Background, (3) Scene props."
+  }
+}
