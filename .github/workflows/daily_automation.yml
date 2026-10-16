@@ -1,9 +1,9 @@
-name: Daily Kids Episode Automation (Tales of Wonder)
+name: Kids Episode Automation (Tales of Wonder - Every 2 Hours)
 
 on:
   schedule:
-    # Runs automatically every day at 08:00 AM UTC (adjust to your preferred time)
-    - cron: '0 8 * * *'
+    # Runs automatically every 2 hours
+    - cron: '0 */2 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions web interface
 
 permissions:
