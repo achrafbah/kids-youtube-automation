@@ -4,8 +4,13 @@ Coordinates the multi-agent production pipeline from concept to published episod
 
 import datetime
 import json
+import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
+
+scripts_dir = Path(__file__).resolve().parent.parent / "scripts"
+if str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
 
 from .scriptwriter import ScriptwriterAgent
 from .art_director import ArtDirectorAgent

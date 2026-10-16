@@ -32,13 +32,18 @@ if sys.platform == "win32":
     except Exception:
         pass
 
+# Add repository root and scripts directory to sys.path
+BASE_DIR = Path(__file__).resolve().parent.parent
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
 from google import genai
 from PIL import Image
 import imageio_ffmpeg
 from youtube_uploader import upload_video
-
-# Add parent directory to path for production_studio imports
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from production_studio.animation_engine import AnimationEngine
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,12 +77,13 @@ def save_json(path, data):
 # Rich pedagogical curriculum for 3 to 10 years across 4 core pillars (32+ Topics)
 CURRICULUM_TOPICS = [
     # ==========================================
+    # ==========================================
     # المحور 1: الأخلاق والآداب والتربية الحسنة (Manners & Values)
     # ==========================================
     {
         "topic_key": "polite-words-magic",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "scene_peace_garden.jpg",
         "title_ar": "سِحْرُ الكَلِمَاتِ الطَّيِّبَة: مِنْ فَضْلِكَ وَشُكْرًا ✨",
         "script": (
             "أَهْلًا يَا أَبْطَالَ حِكَايَاتِ العَجَائِب! "
@@ -92,7 +98,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "respecting-parents",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "scene_dining_bismillah.jpg",
         "title_ar": "بِرُّ الوَالِدَيْن: أُمِّي وَأَبِي تَاجُ رَأْسِي ❤️",
         "script": (
             "مَرْحَبًا يَا أَصْدِقَائِي الأَعِزَّاء! "
@@ -120,7 +126,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "sharing-is-caring",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "scene_sharing_playground.jpg",
         "title_ar": "مُشَارَكَةُ الأَلْعَاب: فَرَحَةُ العَطَاءِ 🧸🎁",
         "script": (
             "مَرْحَبًا يَا صِغَارِي! اللَّعِبُ لَذِيذ، لَكِنَّ اللَّعِبَ مَعَ الأَصْدِقَاءِ أَجْمَلُ بِكَثِير! "
@@ -133,7 +139,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "spreading-peace-salam",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "scene_peace_garden.jpg",
         "title_ar": "تَحِيَّةُ الإِسْلَام: السَّلَامُ عَلَيْكُمْ 🕊️",
         "script": (
             "أَهْلًا يَا أَبْطَال! مَا هِيَ أَجْمَلُ تَحِيَّةٍ نَبْدَأُ بِهَا يَوْمَنَا؟ "
@@ -146,7 +152,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "helping-the-elderly",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "routine_tidying_toys.jpg",
         "title_ar": "مُسَاعَدَةُ الكِبَارِ وَالعَطْفُ عَلَيْهِم 👵👴",
         "script": (
             "مَرْحَبًا يَا أَصْدِقَائِي! الجَدُّ وَالجَدَّةُ بَرَكَةُ بَيْتِنَا! "
@@ -159,7 +165,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "kindness-to-animals",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "nature_rain_forest.jpg",
+        "scene_name": "scene_animal_kindness.jpg",
         "title_ar": "الرِّفْقُ بِالحَيَوَان: صَدِيقُنَا الأَلِيف 🐱🐦",
         "script": (
             "أَهْلًا يَا صِغَار! الحَيَوَانَاتُ وَالطُّيُورُ مَخْلُوقَاتٌ لَطِيفَةٌ تُحِبُّ الرِّعَايَة! "
@@ -172,7 +178,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "patience-and-calm",
         "pillar": "الآداب والأخلاق (Manners)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "nature_rain_forest.jpg",
         "title_ar": "الصَّبْرُ الجَمِيلُ وَالتَّحَكُّمُ فِي الغَضَب 🧘‍♂️🌟",
         "script": (
             "مَرْحَبًا يَا أَبْطَال! عِنْدَمَا لَا تَسِيرُ الأُمُورُ كَمَا نُرِيد، مَاذَا نَفْعَل؟ "
@@ -203,7 +209,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-taa-thaa",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "scene_art_colors.jpg",
         "title_ar": "قِطَارُ الحُرُوف: حَرْفُ التَّاءِ وَالثَّاء 🍎🦊",
         "script": (
             "أَهْلًا يَا أَبْطَالَ اللُّغَةِ العَرَبِيَّة! "
@@ -217,7 +223,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-jeem-haa-khaa",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "nature_rain_forest.jpg",
         "title_ar": "قِطَارُ الحُرُوف: الإِخْوَةُ الثَّلَاثَة (ج، ح، خ) 🐪🐴",
         "script": (
             "مَرْحَبًا يَا أَصْدِقَائِي! مَعَنَا اليَوْمَ ثَلَاثَةُ إِخْوَةٍ مُتَشَابِهِين! "
@@ -232,7 +238,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-dal-dhal",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "scene_letters_dal_dhal.jpg",
         "title_ar": "قِطَارُ الحُرُوف: حَرْفُ الدَّالِ وَالذَّال 🐻🐺",
         "script": (
             "أَهْلًا يَا صِغَار! رِحْلَتُنَا مُسْتَمِرَّةٌ مَعَ حَرْفِ الدَّال: دَ.. دُبٌّ طَيِّبٌ يُحِبُّ العَسَل! وَدَرَّاجَةٌ سَرِيعَة! "
@@ -245,7 +251,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-raa-zay",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "scene_fruits_kitchen.jpg",
         "title_ar": "قِطَارُ الحُرُوف: حَرْفُ الرَّاءِ وَالزَّاي 🍇🦒",
         "script": (
             "مَرْحَبًا يَا عَبَاقِرَة! حَرْفُ الرَّاءِ كَالزُّحْلُوقَة: رَ.. رُمَّانٌ يَاقُوتِيٌّ لَذِيذ! وَرِيشَةٌ نَاعِمَة! "
@@ -258,7 +264,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-seen-sheen",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "scene_peace_garden.jpg",
         "title_ar": "قِطَارُ الحُرُوف: حَرْفُ السِّينِ وَالشِّين 🐟☀️",
         "script": (
             "أَهْلًا بِأَصْدِقَائِي! حَرْفُ السِّينِ لَهُ ثَلَاثَةُ أَسْنَان: سَ.. سَمَكَةٌ تَسْبَحُ فِي البَحْر! وَسَيَّارَةٌ لَامِعَة! "
@@ -271,7 +277,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "arabic-letters-saad-daad",
         "pillar": "اللغة العربية والروض (Alphabet)",
-        "scene_name": "alphabet_nursery.jpg",
+        "scene_name": "scene_sharing_playground.jpg",
         "title_ar": "قِطَارُ الحُرُوف: حَرْفُ الصَّادِ وَالضَّاد 🦅🐸",
         "script": (
             "مَرْحَبًا يَا أَبْطَالَ اللُّغَة! حَرْفُ الصَّادِ القَوِيّ: صَـ.. صَقْرٌ يُحَلِّقُ عَالِيًا فِي السَّمَاء! وَصُنْدُوقُ أَلْعَاب! "
@@ -317,7 +323,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "counting-numbers-6-to-10",
         "pillar": "الأرقام والحساب (Numbers & Math)",
-        "scene_name": "counting_numbers.jpg",
+        "scene_name": "scene_bedtime_stars.jpg",
         "title_ar": "مُغَامَرَةُ الأَرْقَام: نُكْمِلُ العَدَّ مِنْ 6 إِلَى 10 ⭐🔟",
         "script": (
             "أَهْلًا بِعَبَاقِرَةِ الرِّيَاضِيَّات! نُوَاصِلُ رِحْلَةَ العَدِّ المُمْتِعَة! "
@@ -331,7 +337,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "geometric-shapes-colors",
         "pillar": "الأشكال والألوان (Shapes & Colors)",
-        "scene_name": "counting_numbers.jpg",
+        "scene_name": "scene_art_colors.jpg",
         "title_ar": "عَالَمُ الأَشْكَالِ الهَنْدَسِيَّةِ وَالأَلْوَان 🟡🔺🟦",
         "script": (
             "انْظُرُوا حَوْلَكُمْ فِي الغُرْفَة! "
@@ -346,7 +352,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "fun-addition-fruits",
         "pillar": "الأرقام والحساب (Numbers & Math)",
-        "scene_name": "counting_numbers.jpg",
+        "scene_name": "scene_fruits_kitchen.jpg",
         "title_ar": "الجَمْعُ المُمْتِعُ مَعَ الفَوَاكِهِ اللَّذِيذَة 🍌🍓",
         "script": (
             "تَعَالَوْا نَلْعَبْ لُعْبَةَ الجَمْعِ السِّحْرِيَّة! "
@@ -360,7 +366,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "big-and-small-sizes",
         "pillar": "الأشكال والألوان (Shapes & Colors)",
-        "scene_name": "counting_numbers.jpg",
+        "scene_name": "scene_animal_kindness.jpg",
         "title_ar": "عَالَمُ الأَحْجَام: كَبِيرٌ وَصَغِير 🐘🐁",
         "script": (
             "انْظُرُوا مَعِي يَا أَصْدِقَائِي! "
@@ -387,7 +393,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "primary-colors-magic",
         "pillar": "الأشكال والألوان (Shapes & Colors)",
-        "scene_name": "counting_numbers.jpg",
+        "scene_name": "scene_art_colors.jpg",
         "title_ar": "سِحْرُ الأَلْوَانِ الأَسَاسِيَّةِ فِي حَيَاتِنَا 🎨🌈",
         "script": (
             "عَالَمُنَا مَلِيءٌ بِالأَلْوَانِ البَهِيَّة! "
@@ -463,7 +469,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "healthy-eating-vegetables",
         "pillar": "العادات الصحية والنظام (Healthy Habits)",
-        "scene_name": "manners_classroom.jpg",
+        "scene_name": "scene_fruits_kitchen.jpg",
         "title_ar": "طَبَقُ الصِّحَّة: الخُضَارُ وَالفَوَاكِهُ الطَّازَجَة 🥦🥕",
         "script": (
             "مَرْحَبًا يَا أَبْطَالَ القُوَّة! كَيْفَ نَصِيرُ أَقْوِيَاءَ وَنَشِيطِين؟ "
@@ -476,7 +482,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "early-sleep-energy",
         "pillar": "العادات الصحية والنظام (Healthy Habits)",
-        "scene_name": "routine_tidying_toys.jpg",
+        "scene_name": "scene_bedtime_stars.jpg",
         "title_ar": "النَّوْمُ المُبَكِّرُ يَصْنَعُ أَبْطَالَ النَّشَاط 🌙⭐",
         "script": (
             "أَهْلًا يَا صِغَارِي! عِنْدَمَا تَغْرُبُ الشَّمْسُ وَيَأْتِي اللَّيْل، يَحِينُ وَقْتُ الرَّاحَة! "
@@ -489,7 +495,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "drinking-water-vitality",
         "pillar": "العادات الصحية والنظام (Healthy Habits)",
-        "scene_name": "hygiene_brushing_teeth.jpg",
+        "scene_name": "scene_dining_bismillah.jpg",
         "title_ar": "المَاءُ سِرُّ الحَيَاةِ وَالانْتِعَاش 💧🥤",
         "script": (
             "مَرْحَبًا يَا أَبْطَال! جِسْمُنَا الذَّكِيُّ يَحْتَاجُ إِلَى المَاءِ لِيَبْقَى قَوِيًّا وَمُنْتَعِشًا! "
@@ -502,7 +508,7 @@ CURRICULUM_TOPICS = [
     {
         "topic_key": "morning-kids-exercise",
         "pillar": "العادات الصحية والنظام (Healthy Habits)",
-        "scene_name": "nature_rain_forest.jpg",
+        "scene_name": "scene_morning_exercise.jpg",
         "title_ar": "الرِّيَاضَةُ الصَّبَاحِيَّةُ لِأَجْسَامٍ قَوِيَّة 🏃‍♂️🤸‍♀️",
         "script": (
             "صَبَاحُ النَّشَاطِ يَا أَبْطَال! هَيَّا نَتَحَرَّكْ مَعًا! "
@@ -527,30 +533,72 @@ CURRICULUM_TOPICS = [
     }
 ]
 
+ALL_AVAILABLE_SCENES = [
+    "scene_animal_kindness.jpg",
+    "scene_letters_dal_dhal.jpg",
+    "scene_art_colors.jpg",
+    "scene_fruits_kitchen.jpg",
+    "scene_morning_exercise.jpg",
+    "scene_bedtime_stars.jpg",
+    "scene_sharing_playground.jpg",
+    "scene_dining_bismillah.jpg",
+    "scene_peace_garden.jpg",
+    "counting_numbers.jpg",
+    "hygiene_brushing_teeth.jpg",
+    "routine_tidying_toys.jpg",
+    "nature_rain_forest.jpg",
+    "alphabet_nursery.jpg",
+    "manners_classroom.jpg"
+]
+
 def get_next_unique_curriculum_topic():
+    """Retrieve next uncompleted curriculum topic with strict zero-repetition visual diversity guard."""
     history_data = load_json(TOPICS_FILE)
     existing_keys = {t.get("topic_key", t.get("title", "")).lower() for t in history_data.get("topics", [])}
 
+    # Identify last used scene from history
+    last_used_scene = None
+    if history_data.get("topics"):
+        for t in reversed(history_data["topics"]):
+            if "scene_name" in t:
+                last_used_scene = t["scene_name"]
+                break
+
+    selected_item = None
     for item in CURRICULUM_TOPICS:
         if item["topic_key"].lower() not in existing_keys:
-            return item, history_data
+            selected_item = dict(item)
+            break
 
-    # Dynamic endless rotation with unique timestamp
-    now = datetime.datetime.now()
-    timestamp_key = now.strftime("%Y-%m-%d-%H%M")
-    fallback = {
-        "topic_key": f"preschool-adventure-{timestamp_key}",
-        "pillar": "التربية والتعليم الشامل (Preschool)",
-        "scene_name": "manners_classroom.jpg",
-        "title_ar": f"مُغَامَرَةُ التَّعَلُّمِ وَالأَخْلَاق ({now.strftime('%d/%m %H:%M')}) 🌟",
-        "script": (
-            "مَرْحَبًا يَا أَصْدِقَائِي! كُلَّ سَاعَةٍ نَتَعَلَّمُ شَيْئًا جَدِيدًا يُنِيرُ عُقُولَنَا وَيُهَذِّبُ أَخْلَاقَنَا! "
-            "احْتَرِمُوا كِبَارَكُمْ، وَسَاعِدُوا إِخْوَانَكُمْ، وَكُونُوا دَوْمًا نُجُومًا مُشْرِقَةً بِالعِلْمِ وَالأَدَب!"
-        ),
-        "lesson": "التعلم المستمر والتحلي بالأخلاق يرفعان شأن الطفل الصالح.",
-        "tags": ["#shorts", "#تربية_الطفل", "#أخلاق_الأطفال", "#تعليم_الروضة", "#talesofwonder"]
-    }
-    return fallback, history_data
+    # If all curated topics exhausted, dynamic endless generator
+    if not selected_item:
+        now = datetime.datetime.now()
+        timestamp_key = now.strftime("%Y-%m-%d-%H%M")
+        rot_idx = len(history_data.get("topics", [])) % len(ALL_AVAILABLE_SCENES)
+        chosen_scene = ALL_AVAILABLE_SCENES[rot_idx]
+        if chosen_scene == last_used_scene:
+            chosen_scene = ALL_AVAILABLE_SCENES[(rot_idx + 1) % len(ALL_AVAILABLE_SCENES)]
+            
+        selected_item = {
+            "topic_key": f"preschool-adventure-{timestamp_key}",
+            "pillar": "التربية والتعليم الشامل (Preschool)",
+            "scene_name": chosen_scene,
+            "title_ar": f"مُغَامَرَةُ التَّعَلُّمِ وَالأَخْلَاق ({now.strftime('%d/%m %H:%M')}) 🌟",
+            "script": (
+                "مَرْحَبًا يَا أَصْدِقَائِي! كُلَّ سَاعَةٍ نَتَعَلَّمُ شَيْئًا جَدِيدًا يُنِيرُ عُقُولَنَا وَيُهَذِّبُ أَخْلَاقَنَا! "
+                "احْتَرِمُوا كِبَارَكُمْ، وَسَاعِدُوا إِخْوَانَكُمْ، وَكُونُوا دَوْمًا نُجُومًا مُشْرِقَةً بِالعِلْمِ وَالأَدَب!"
+            ),
+            "lesson": "التعلم المستمر والتحلي بالأخلاق يرفعان شأن الطفل الصالح.",
+            "tags": ["#shorts", "#تربية_الطفل", "#أخلاق_الأطفال", "#تعليم_الروضة", "#talesofwonder"]
+        }
+
+    # Strict Diversity Guard: if selected scene equals the previous video's scene, swap to alternate
+    if last_used_scene and selected_item.get("scene_name") == last_used_scene:
+        current_idx = ALL_AVAILABLE_SCENES.index(last_used_scene) if last_used_scene in ALL_AVAILABLE_SCENES else 0
+        selected_item["scene_name"] = ALL_AVAILABLE_SCENES[(current_idx + 1) % len(ALL_AVAILABLE_SCENES)]
+        print(f"🛡️ Diversity Guard: Swapped scene to {selected_item['scene_name']} to guarantee zero consecutive visual repetition!", flush=True)
+
+    return selected_item, history_data
 
 def generate_voiceover(text, output_audio_path):
     print("🎙️ Generating Gemini 3.8 Flash TTS storytelling voiceover...", flush=True)
@@ -652,6 +700,7 @@ def execute_daily_run():
         "pillar": topic["pillar"],
         "title": topic["title_ar"],
         "lesson": topic["lesson"],
+        "scene_name": topic.get("scene_name", "manners_classroom.jpg"),
         "video_url": upload_result.get("video_url") if upload_result else None,
         "status": "public_published"
     }
