@@ -45,6 +45,7 @@ from PIL import Image
 import imageio_ffmpeg
 from youtube_uploader import upload_video
 from production_studio.animation_engine import AnimationEngine
+from production_studio.art_director import ArtDirectorAgent
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -632,8 +633,18 @@ def generate_voiceover(text, output_audio_path):
     print(f"✅ Voiceover saved: {output_audio_path}", flush=True)
     return output_audio_path
 
-def assemble_video(image_path, audio_path, bgm_path, output_video_path, topic_title="حِكَايَاتُ العَجَائِب", script_text=""):
-    print(f"🎬 Rendering dynamic animated Shorts with Option 2 (motion flow) and Option 3 (subtitles & overlays)...", flush=True)
+def assemble_video(
+    image_path,
+    audio_path,
+    bgm_path,
+    output_video_path,
+    topic_title="حِكَايَاتُ العَجَائِب",
+    script_text="",
+    theme_palette=None,
+    particles=None,
+    camera_profile=None
+):
+    print(f"🎬 Rendering dynamic animated Shorts with script-driven cinematography & theme...", flush=True)
     engine = AnimationEngine(base_dir=BASE_DIR)
     return engine.render_animated_episode(
         scene_image_path=image_path,
@@ -641,7 +652,10 @@ def assemble_video(image_path, audio_path, bgm_path, output_video_path, topic_ti
         bgm_path=bgm_path,
         topic_title=topic_title,
         script_text=script_text,
-        output_video_path=output_video_path
+        output_video_path=output_video_path,
+        theme_palette=theme_palette,
+        particles=particles,
+        camera_profile=camera_profile
     )
 
 def execute_daily_run():
@@ -652,26 +666,57 @@ def execute_daily_run():
 
     audio_path = ep_dir / "voiceover.wav"
     video_path = ep_dir / "episode_shorts.mp4"
+    scene_file = ep_dir / "scene_canvas.jpg"
 
-    # Select scene image matching topic
-    scene_file = SCENES_DIR / topic.get("scene_name", "manners_classroom.jpg")
-    if not scene_file.exists():
-        scene_file = SCENES_DIR / "manners_classroom.jpg"
+    # Identify last used scene from history for strict diversity guard
+    last_used_scene = None
+    if history_data.get("topics"):
+        for t in reversed(history_data["topics"]):
+            if "scene_name" in t:
+                last_used_scene = t["scene_name"]
+                break
 
-    # Step 1: TTS
+    # Step 1: Script Analysis & Visual/Animation Design (Intila9an men script -> image & animation)
+    print("🎨 Art Director AI analyzing script to design custom 3D visual & animation...", flush=True)
+    art_director = ArtDirectorAgent()
+    visual_spec = art_director.analyze_script_and_design_visuals(
+        script_text=topic["script"],
+        title=topic["title_ar"],
+        pillar=topic["pillar"]
+    )
+    print(f"🎬 Visual Description: {visual_spec.get('scene_description')}", flush=True)
+    print(f"🎨 Theme: {visual_spec.get('theme_palette')} | Particles: {visual_spec.get('particle1')} {visual_spec.get('particle2')} | Cam Profile: #{visual_spec.get('camera_style')}", flush=True)
+
+    # Save visual prompt and specification for full transparency & tracking
+    with open(ep_dir / "scene_prompt.json", "w", encoding="utf-8") as pf:
+        json.dump(visual_spec, pf, ensure_ascii=False, indent=2)
+    with open(ep_dir / "scene_prompt.txt", "w", encoding="utf-8") as pf:
+        pf.write(visual_spec.get("image_prompt", ""))
+
+    # Step 2: Generate or Resolve Scene Image from script spec
+    scene_file = art_director.generate_or_resolve_scene_image(
+        visual_spec=visual_spec,
+        output_path=scene_file,
+        last_used_scene=last_used_scene
+    )
+
+    # Step 3: Storytelling Voiceover via Gemini 3.8 Flash TTS
     generate_voiceover(topic["script"], audio_path)
 
-    # Step 2: Video Assemble with Options 2 & 3 (Kinetic camera, floating animated stars, and synchronized Arabic subtitles)
+    # Step 4: Video Assembly with Dynamic Script-Driven Animation & Cinematography
     assemble_video(
         image_path=scene_file,
         audio_path=audio_path,
         bgm_path=BGM_FILE,
         output_video_path=video_path,
         topic_title=topic["title_ar"],
-        script_text=topic["script"]
+        script_text=topic["script"],
+        theme_palette=visual_spec.get("theme_palette"),
+        particles=(visual_spec.get("particle1", "⭐"), visual_spec.get("particle2", "✨")),
+        camera_profile=visual_spec.get("camera_style")
     )
 
-    # Step 3: Upload to YouTube as DRAFT / PRIVATE
+    # Step 5: Upload to YouTube as PUBLIC
     title = f"{topic['title_ar']} | برنامج الروضة والأخلاق 🌟"
     description = (
         f"مرحباً بكم في حكايات العجائب (Tales of Wonder)! 🌟\n\n"
@@ -693,14 +738,15 @@ def execute_daily_run():
         thumbnail_path=str(scene_file)
     )
 
-    # Step 4: Record history to prevent duplicates
+    # Step 6: Record history to prevent duplicates
     new_entry = {
         "topic_key": topic["topic_key"],
         "date": today_str,
         "pillar": topic["pillar"],
         "title": topic["title_ar"],
         "lesson": topic["lesson"],
-        "scene_name": topic.get("scene_name", "manners_classroom.jpg"),
+        "scene_name": visual_spec.get("best_matching_scene", topic.get("scene_name")),
+        "scene_description": visual_spec.get("scene_description", ""),
         "video_url": upload_result.get("video_url") if upload_result else None,
         "status": "public_published"
     }
@@ -712,7 +758,7 @@ def execute_daily_run():
     print(f"Pillar: {topic['pillar']}")
     print(f"Title: {topic['title_ar']}")
     if upload_result:
-        print(f"Draft URL: {upload_result['video_url']}")
+        print(f"Public URL: {upload_result['video_url']}")
     print("=" * 50)
     return new_entry
 

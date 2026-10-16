@@ -278,7 +278,10 @@ class AnimationEngine:
         topic_title: str,
         script_text: str,
         output_video_path: Path,
-        theme_emoji: str = "🧸"
+        theme_emoji: str = "🧸",
+        theme_palette: Optional[str] = None,
+        particles: Optional[tuple] = None,
+        camera_profile: Optional[int] = None
     ) -> Path:
         """Render high-engagement, fully animated 9:16 Shorts with options 2 & 3 and zero repetition."""
         print("🎬 [Option 2 & 3] Rendering animated episode with dynamic multi-profile cinematography...", flush=True)
@@ -290,7 +293,16 @@ class AnimationEngine:
         print(f"Voiceover duration: {duration:.2f} seconds", flush=True)
 
         # Step 0: Resolve dynamic theme and cinematography profile
-        style_info = self.get_cinematography_and_theme(topic_title, script_text)
+        if theme_palette and particles and camera_profile is not None:
+            style_info = {
+                "theme": theme_palette,
+                "particle1": particles[0],
+                "particle2": particles[1],
+                "cam_profile": camera_profile
+            }
+        else:
+            style_info = self.get_cinematography_and_theme(topic_title, script_text)
+
         print(f"🎨 Theme: {style_info['theme']} | Particles: {style_info['particle1']} {style_info['particle2']} | Camera Profile: #{style_info['cam_profile']}", flush=True)
 
         # Step 1: Prepare base 1080x1920 image
