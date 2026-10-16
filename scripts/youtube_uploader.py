@@ -92,7 +92,7 @@ def upload_video(
     description,
     tags,
     category_id="27",  # 27 = Education
-    privacy_status="private",  # Always private / draft by default for review
+    privacy_status="public",  # Direct public publishing
     made_for_kids=True,
     thumbnail_path=None
 ):

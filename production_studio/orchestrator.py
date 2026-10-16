@@ -118,13 +118,13 @@ class StudioOrchestrator:
         # ----------------------------------------------------
         upload_result = None
         if upload_to_youtube and qa_report["approved"]:
-            print("\n--- [STAGE 7] AUTOMATED YOUTUBE DEPLOYMENT (PRIVATE/DRAFT) ---", flush=True)
+            print("\n--- [STAGE 7] AUTOMATED YOUTUBE DEPLOYMENT (DIRECT PUBLIC) ---", flush=True)
             upload_result = upload_video(
                 video_path=video_path,
                 title=copy_data["optimized_title"],
                 description=copy_data["description"],
                 tags=copy_data["tags"],
-                privacy_status="private",
+                privacy_status="public",
                 made_for_kids=True,
                 thumbnail_path=str(canvas_path)
             )

@@ -640,7 +640,7 @@ def execute_daily_run():
         title=title,
         description=description,
         tags=topic["tags"],
-        privacy_status="private",  # Strictly DRAFT / PRIVATE
+        privacy_status="public",  # Direct Public Publishing
         made_for_kids=True,
         thumbnail_path=str(scene_file)
     )
@@ -653,7 +653,7 @@ def execute_daily_run():
         "title": topic["title_ar"],
         "lesson": topic["lesson"],
         "video_url": upload_result.get("video_url") if upload_result else None,
-        "status": "private_draft"
+        "status": "public_published"
     }
     history_data.setdefault("topics", []).append(new_entry)
     save_json(TOPICS_FILE, history_data)
