@@ -572,27 +572,76 @@ def get_next_unique_curriculum_topic():
             selected_item = dict(item)
             break
 
-    # If all curated topics exhausted, dynamic endless generator
+    # If all curated topics exhausted, dynamic AI-driven endless curriculum generator
     if not selected_item:
-        now = datetime.datetime.now()
-        timestamp_key = now.strftime("%Y-%m-%d-%H%M")
+        print("🤖 Curated curriculum covered! Sourcing brand-new pedagogical topic via Gemini AI...", flush=True)
+        api_key = get_gemini_api_key()
+        pillars = [
+            "الآداب والأخلاق الإسلامية والتربية الحسنة",
+            "برنامج الروض واللغة العربية وحروف الهجاء",
+            "الأرقام والحساب الممتع والرياضيات المبسطة",
+            "الأشكال والألوان والذكاء البصري للأطفال",
+            "العادات الصحية والنظام اليومي للأطفال"
+        ]
+        chosen_pillar = pillars[len(existing_keys) % len(pillars)]
         rot_idx = len(history_data.get("topics", [])) % len(ALL_AVAILABLE_SCENES)
         chosen_scene = ALL_AVAILABLE_SCENES[rot_idx]
         if chosen_scene == last_used_scene:
             chosen_scene = ALL_AVAILABLE_SCENES[(rot_idx + 1) % len(ALL_AVAILABLE_SCENES)]
-            
-        selected_item = {
-            "topic_key": f"preschool-adventure-{timestamp_key}",
-            "pillar": "التربية والتعليم الشامل (Preschool)",
-            "scene_name": chosen_scene,
-            "title_ar": f"مُغَامَرَةُ التَّعَلُّمِ وَالأَخْلَاق ({now.strftime('%d/%m %H:%M')}) 🌟",
-            "script": (
-                "مَرْحَبًا يَا أَصْدِقَائِي! كُلَّ سَاعَةٍ نَتَعَلَّمُ شَيْئًا جَدِيدًا يُنِيرُ عُقُولَنَا وَيُهَذِّبُ أَخْلَاقَنَا! "
-                "احْتَرِمُوا كِبَارَكُمْ، وَسَاعِدُوا إِخْوَانَكُمْ، وَكُونُوا دَوْمًا نُجُومًا مُشْرِقَةً بِالعِلْمِ وَالأَدَب!"
-            ),
-            "lesson": "التعلم المستمر والتحلي بالأخلاق يرفعان شأن الطفل الصالح.",
-            "tags": ["#shorts", "#تربية_الطفل", "#أخلاق_الأطفال", "#تعليم_الروضة", "#talesofwonder"]
-        }
+
+        prompt = (
+            f"أنت خبير تربوي ومؤلف محتوى أطفال لمرحلة الروضة والتعليم المبكر (3-10 سنوات) لقناة كرتون 3D هادفة.\n"
+            f"المحور المطلوب: {chosen_pillar}\n"
+            f"اكتب موضوع حلقة شورتس كرتونية جديدة ومبتكرة تماماً لا تشبه الحلقات السابقة.\n\n"
+            f"المعايير:\n"
+            f"1. العنوان: جذاب، مشوق للأطفال، يحتوي إيموجي، وبدون تشكيل معقد، أقل من 50 حرف.\n"
+            f"2. النص الكرتوني (Script): قصة أو حوار مرح ومشجع يلقيه الراوي للطفل، بين 40 و 65 كلمة باللغة العربية الفصحى السلسة والمحببة للأطفال.\n"
+            f"3. الدرس المستفاد (Lesson): جملة واحدة تلخص الفائدة التربوية أو الأخلاقية.\n"
+            f"4. الكلمات الدلالية: 5 وسوم متعلقة بالموضوع.\n\n"
+            f"أعد الإجابة بصيغة JSON حصراً:\n"
+            f"{{\n"
+            f'  "topic_key": "unique-slug-en",\n'
+            f'  "title_ar": "العنوان المشوق باللغة العربية 🌟",\n'
+            f'  "script": "النص الكرتوني الكامل هنا...",\n'
+            f'  "lesson": "الدرس المستفاد هنا...",\n'
+            f'  "tags": ["#shorts", "#تعليم_اطفال", "#كرتون", "#talesofwonder"]\n'
+            f"}}"
+        )
+
+        candidate_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        for model_name in candidate_models:
+            try:
+                client = genai.Client(api_key=api_key)
+                resp = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config={"response_mime_type": "application/json"}
+                )
+                if resp and resp.text:
+                    data = json.loads(resp.text)
+                    if data.get("title_ar") and data.get("script"):
+                        slug = data.get("topic_key", f"ai-topic-{int(datetime.datetime.now().timestamp())}")
+                        selected_item = {
+                            "topic_key": slug,
+                            "pillar": chosen_pillar,
+                            "scene_name": chosen_scene,
+                            "title_ar": data["title_ar"],
+                            "script": data["script"],
+                            "lesson": data.get("lesson", "التعلم المستمر والأخلاق الحميدة ينيران عقول أبطالنا الصغار."),
+                            "tags": data.get("tags", ["#shorts", "#أطفال", "#كرتون_تعليمي", "#talesofwonder"])
+                        }
+                        break
+            except Exception as e:
+                print(f"Gemini topic generation warning ({model_name}): {e}", flush=True)
+
+        # Dynamic fail-safe curated cycle if offline/quota
+        if not selected_item:
+            cycle_idx = len(existing_keys) % len(CURRICULUM_TOPICS)
+            base_item = dict(CURRICULUM_TOPICS[cycle_idx])
+            cycle_num = (len(existing_keys) // len(CURRICULUM_TOPICS)) + 1
+            base_item["topic_key"] = f"{base_item['topic_key']}-cycle-{cycle_num}"
+            base_item["scene_name"] = chosen_scene
+            selected_item = base_item
 
     # Strict Diversity Guard: if selected scene equals the previous video's scene, swap to alternate
     if last_used_scene and selected_item.get("scene_name") == last_used_scene:
