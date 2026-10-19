@@ -105,11 +105,21 @@ def upload_video(
         print(f"❌ Video file does not exist: {video_path}")
         return None
 
+    # Sanitize and deduplicate tags: YouTube expects clean keywords without '#' (max 500 chars)
+    clean_tags = []
+    char_count = 0
+    for t in (tags or []):
+        c = str(t).lstrip("#").strip()
+        if c and c not in clean_tags:
+            if char_count + len(c) + 1 <= 480:
+                clean_tags.append(c)
+                char_count += len(c) + 1
+
     body = {
         "snippet": {
             "title": title[:100],  # YouTube max title length is 100
             "description": description[:5000],
-            "tags": tags,
+            "tags": clean_tags,
             "categoryId": category_id,
             "defaultLanguage": "ar",
             "defaultAudioLanguage": "ar"

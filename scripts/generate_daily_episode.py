@@ -18,6 +18,7 @@ Audio & Visual Pipeline:
 
 import os
 import sys
+import re
 import json
 import base64
 import datetime
@@ -658,6 +659,118 @@ def assemble_video(
         camera_profile=camera_profile
     )
 
+def clean_arabic_text(text: str) -> str:
+    """Removes excessive Arabic diacritics (tashkeel) and tatweel for search indexing."""
+    if not text:
+        return ""
+    tashkeel_regex = re.compile(r'[\u0617-\u061A\u064B-\u0652]')
+    cleaned = tashkeel_regex.sub('', text)
+    cleaned = cleaned.replace('ـ', '')  # Remove tatweel
+    return re.sub(r'\s+', ' ', cleaned).strip()
+
+def build_optimized_seo_package(topic: dict) -> dict:
+    """
+    Builds maximum-CTR and high-ranking YouTube Shorts metadata:
+    1. Short, Hook-focused Title ending with #shorts (strictly under 60-70 chars for mobile feed display)
+    2. Rich keyword-dense Description starting with high-intent keywords + educational CTA + targeted hashtags
+    3. 500-Character Master Tag Pool (Clean keywords without '#', mixing universal kids queries, pillar-specific Arabic queries, and English queries).
+    """
+    raw_title = topic.get("title_ar", "")
+    clean_title = clean_arabic_text(raw_title)
+    pillar = topic.get("pillar", "")
+    lesson = topic.get("lesson", "")
+
+    # 1. OPTIMIZED TITLE (Mobile Shorts Hook)
+    base_title = clean_title.split("|")[0].strip()
+    if "#shorts" not in base_title.lower():
+        if len(base_title) > 52:
+            base_title = base_title[:52].rstrip()
+        optimized_title = f"{base_title} #shorts"
+    else:
+        optimized_title = base_title[:65]
+
+    # 2. PILLAR MAPPING & TARGETED HASHTAGS
+    pillar_lower = pillar.lower()
+    key_lower = topic.get("topic_key", "").lower()
+
+    pillar_tags = []
+    pillar_hashtags = []
+
+    if "أرقام" in pillar or "حساب" in pillar or "number" in key_lower or "count" in key_lower:
+        pillar_tags = [
+            "تعليم الارقام للاطفال", "تعلم العد للاطفال", "حساب الروضة",
+            "ارقام الروضة", "رياضيات مبسطة للاطفال", "الارقام العربية",
+            "learn numbers arabic", "arabic numbers for kids", "counting for toddlers"
+        ]
+        pillar_hashtags = ["#تعليم_الارقام", "#حساب_الاطفال", "#ارقام_الروضة", "#رياضيات_مبسطة"]
+    elif "أشكال" in pillar or "ألوان" in pillar or "color" in key_lower or "shape" in key_lower:
+        pillar_tags = [
+            "تعليم الاشكال للاطفال", "تعلم الالوان للاطفال", "الاشكال الهندسية للاطفال",
+            "الالوان الاساسية", "رسم وتلوين للاطفال", "الوان و اشكال الروضة",
+            "learn shapes and colors", "arabic colors for kids", "shapes in arabic"
+        ]
+        pillar_hashtags = ["#تعليم_الالوان", "#الاشكال_للاطفال", "#رسم_وتلوين", "#اشكال_الروضة"]
+    elif "حروف" in pillar or "عربية" in pillar or "alphabet" in key_lower or "letter" in key_lower:
+        pillar_tags = [
+            "تعليم الحروف للاطفال", "حروف الهجاء", "الحروف العربية للاطفال",
+            "الف باء تاء", "لغتي الجميلة", "تعلم القراءة للاطفال",
+            "انشودة الحروف", "arabic alphabet for kids", "learn arabic letters"
+        ]
+        pillar_hashtags = ["#حروف_الهجاء", "#تعليم_الحروف", "#لغتي_العربية", "#الحروف_الابجدية"]
+    else:  # Manners / Morals / Healthy Habits
+        pillar_tags = [
+            "تربية الطفل", "اخلاق الطفل", "تعديل سلوك الاطفال",
+            "اداب اسلامية للاطفال", "بر الوالدين للاطفال", "قصص هادفة للاطفال",
+            "اخلاق حميدة", "احترام الكبير", "moral stories for kids", "good manners kids"
+        ]
+        pillar_hashtags = ["#تربية_الطفل", "#اخلاق_الاطفال", "#قصص_هادفة", "#آداب_الطفل"]
+
+    # 3. MASTER BASE TAGS (Universal 500-Character Pool, NO '#')
+    universal_tags = [
+        "تعليم اطفال", "اطفال", "كرتون اطفال", "قصص اطفال", "حكايات اطفال",
+        "رسوم متحركة", "تعليم الروضة", "اناشيد اطفال", "طيور الجنة", "سبيستون",
+        "حكايات العجائب", "tales of wonder", "arabic for kids", "kids animation",
+        "preschool learning", "arabic cartoon", "براعم"
+    ]
+
+    # Topic specific tags (clean from '#')
+    topic_clean_tags = []
+    for t in topic.get("tags", []):
+        ct = clean_arabic_text(t).lstrip("#").strip()
+        if ct and ct not in topic_clean_tags:
+            topic_clean_tags.append(ct)
+
+    # Combine & deduplicate tags up to 480 characters (YouTube allows max 500)
+    final_tags = []
+    total_tag_chars = 0
+    all_candidates = pillar_tags + universal_tags + topic_clean_tags
+    for tag in all_candidates:
+        clean_tag = tag.strip()
+        if clean_tag and clean_tag not in final_tags:
+            if total_tag_chars + len(clean_tag) + 1 <= 480:
+                final_tags.append(clean_tag)
+                total_tag_chars += len(clean_tag) + 1
+
+    # 4. RICH SEO DESCRIPTION
+    universal_hashtags = ["#shorts", "#اطفال", "#كرتون_اطفال", "#رسوم_متحركة", "#حكايات_العجائب", "#kids", "#talesofwonder"]
+    combined_hashtags = " ".join(universal_hashtags + pillar_hashtags[:3])
+
+    description = (
+        f"🌟 {base_title} | حكايات العجائب للأطفال\n\n"
+        f"💡 موضوع اليوم: {base_title}\n"
+        f"🎯 الهدف والدرس المستفاد: {lesson}\n\n"
+        f"محتوى كرتوني وتربوي هادف للأطفال من 3 إلى 10 سنوات (الروضة والمستوى الأولي) لغرس القيم النبيلة وتعليم المهارات الأساسية بأسلوب كرتوني 3D ممتع وشيق.\n\n"
+        f"🔔 اشتركوا في قناة حكايات العجائب (Tales of Wonder) ليصلكم كل يوم فيديو تعليمي وتربوي جديد ومفيد لأطفالكم!\n\n"
+        f"{combined_hashtags}"
+    )
+
+    return {
+        "title": optimized_title,
+        "description": description,
+        "tags": final_tags,
+        "hashtags": combined_hashtags
+    }
+
 def execute_daily_run():
     topic, history_data = get_next_unique_curriculum_topic()
     today_str = datetime.date.today().isoformat()
@@ -716,23 +829,21 @@ def execute_daily_run():
         camera_profile=visual_spec.get("camera_style")
     )
 
-    # Step 5: Upload to YouTube as PUBLIC
-    title = f"{topic['title_ar']} | برنامج الروضة والأخلاق 🌟"
-    description = (
-        f"مرحباً بكم في حكايات العجائب (Tales of Wonder)! 🌟\n\n"
-        f"المحور: {topic['pillar']}\n"
-        f"💡 موضوع اليوم: {topic['title_ar']}\n"
-        f"🎯 الدرس المستفاد: {topic['lesson']}\n\n"
-        f"محتوى تربوي وتأسيسي هادف للأطفال من 3 إلى 10 سنوات (الروضة والمستوى الأولي).\n\n"
-        f"اشتركوا معنا ليتعلم أطفالكم كل يوم خلقاً جديداً ومعلومة مفيدة!\n\n"
-        f"{' '.join(topic['tags'])}"
-    )
+    # Step 5: Upload to YouTube as PUBLIC with Advanced SEO
+    seo_package = build_optimized_seo_package(topic)
+    title = seo_package["title"]
+    description = seo_package["description"]
+    tags = seo_package["tags"]
+
+    print(f"🎯 SEO Optimized Title: {title}", flush=True)
+    print(f"🏷️ SEO Tags ({len(tags)} tags, {sum(len(t) for t in tags)} chars): {tags[:6]}...", flush=True)
+    print(f"📝 Hashtags: {seo_package['hashtags']}", flush=True)
 
     upload_result = upload_video(
         video_path=video_path,
         title=title,
         description=description,
-        tags=topic["tags"],
+        tags=tags,
         privacy_status="public",  # Direct Public Publishing
         made_for_kids=True,
         thumbnail_path=str(scene_file)
@@ -744,6 +855,7 @@ def execute_daily_run():
         "date": today_str,
         "pillar": topic["pillar"],
         "title": topic["title_ar"],
+        "seo_title": title,
         "lesson": topic["lesson"],
         "scene_name": visual_spec.get("best_matching_scene", topic.get("scene_name")),
         "scene_description": visual_spec.get("scene_description", ""),
