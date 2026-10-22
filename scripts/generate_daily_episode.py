@@ -820,8 +820,75 @@ def build_optimized_seo_package(topic: dict) -> dict:
         "hashtags": combined_hashtags
     }
 
+
+def check_algorithm_pacing_window(history_data, min_hours=5.0):
+    """YouTube Shorts Algorithm Pacing Guard:
+    1. Spacing: Wait 4 to 6 hours (default 5.0h) between uploads to avoid cannibalizing the Shorts shelf.
+    2. Active Hours: Avoid publishing between 22:00 and 06:00 UTC (dead-of-night in the Arab world).
+    3. Manual Override: Bypass guard if GITHUB_EVENT_NAME == 'workflow_dispatch' or --force is passed.
+    """
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch" or "--force" in sys.argv:
+        print("⚡ Manual trigger detected: Bypassing algorithm pacing guard.", flush=True)
+        return True
+
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    current_hour_utc = now_utc.hour
+
+    # Sleep hours in MENA region (22:00 UTC = 23:00 Morocco / 01:00 KSA to 06:00 UTC = 07:00 Morocco / 09:00 KSA)
+    if current_hour_utc >= 22 or current_hour_utc < 6:
+        print(f"🌙 [ALGORITHM GUARD] Night hours in target Arab audience (Current UTC: {now_utc.strftime('%H:%M')}).", flush=True)
+        print("   Uploading during low-traffic night hours harms the initial 2-hour velocity in the Shorts shelf.", flush=True)
+        print("   Skipping this cycle until morning preschool hours (07:00+ UTC).", flush=True)
+        return False
+
+    topics = history_data.get("topics", [])
+    if not topics:
+        return True
+
+    # Find the most recent published topic with a valid video_url
+    last_published = None
+    for entry in reversed(topics):
+        if entry.get("status") == "public_published" and entry.get("video_url"):
+            last_published = entry
+            break
+
+    if not last_published:
+        return True
+
+    last_ts_str = last_published.get("published_at")
+    if last_ts_str:
+        try:
+            last_dt = datetime.datetime.fromisoformat(last_ts_str)
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=datetime.timezone.utc)
+            elapsed_hours = (now_utc - last_dt).total_seconds() / 3600.0
+            if elapsed_hours < min_hours:
+                print(f"⏳ [ALGORITHM GUARD] YouTube Shorts Spacing Window Active:", flush=True)
+                print(f"   Last video '{last_published.get('title')}' was published {elapsed_hours:.1f} hours ago.", flush=True)
+                print(f"   YouTube Shorts algorithm requires 4 to 6 hours between uploads to allow seed audience testing.", flush=True)
+                print(f"   Next optimal upload window in ~{min_hours - elapsed_hours:.1f} hours. Skipping this cycle safely.", flush=True)
+                return False
+        except Exception as e:
+            print(f"Notice parsing published_at: {e}", flush=True)
+    else:
+        # Fallback to date comparison if published_at is not present
+        today_date = now_utc.date().isoformat()
+        today_count = sum(1 for e in topics if e.get("date") == today_date and e.get("status") == "public_published")
+        if today_count >= 3:
+            print(f"🛑 [ALGORITHM GUARD] Already published {today_count} videos today ({today_date}).", flush=True)
+            print("   Max 3-4 daily Shorts recommended for optimal channel authority. Skipping.", flush=True)
+            return False
+
+    return True
+
 def execute_daily_run():
+
     topic, history_data = get_next_unique_curriculum_topic()
+
+    # YouTube Shorts Algorithm Pacing Guard (Interval 4 to 6 hours, peak hours only)
+    if not check_algorithm_pacing_window(history_data, min_hours=5.0):
+        print("✅ Cycle gracefully finished without uploading. Channel momentum protected.")
+        sys.exit(0)
     today_str = datetime.date.today().isoformat()
     ep_dir = OUTPUT_DIR / f"{today_str}_{topic['topic_key']}"
     ep_dir.mkdir(parents=True, exist_ok=True)
@@ -902,6 +969,7 @@ def execute_daily_run():
     new_entry = {
         "topic_key": topic["topic_key"],
         "date": today_str,
+        "published_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "pillar": topic["pillar"],
         "title": topic["title_ar"],
         "seo_title": title,
