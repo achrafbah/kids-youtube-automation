@@ -6,6 +6,7 @@ Designed specifically for Preschool & Primary Kids (ages 3 to 10).
 """
 
 import os
+import re
 import sys
 import wave
 import subprocess
@@ -13,7 +14,7 @@ import hashlib
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, features
 import arabic_reshaper
 from bidi.algorithm import get_display
 import imageio_ffmpeg
@@ -103,6 +104,18 @@ class AnimationEngine:
             })
         return timings
 
+    @staticmethod
+    def format_arabic_for_render(text: str) -> tuple[str, dict]:
+        """Format and clean Arabic text for Pillow rendering across Linux (with Raqm) and Windows/fallback (without Raqm)."""
+        clean = re.sub(r'''[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FFa-zA-Z0-9\s!?,.:;\-\(\)|«»"'/]+''', '', text).strip()
+        clean = re.sub(r'\s+', ' ', clean)
+        if features.check('raqm'):
+            return clean, {"direction": "rtl", "language": "ar"}
+        else:
+            reshaped = arabic_reshaper.reshape(clean)
+            bidi_txt = get_display(reshaped)
+            return bidi_txt, {}
+
     def create_header_badge(self, title_text: str, out_path: Path, theme: str = "default") -> Path:
         """Render glowing top pedagogical header badge with dynamic theme colors."""
         w, h = 940, 110
@@ -124,20 +137,25 @@ class AnimationEngine:
         draw.rounded_rectangle([8, 8, w - 8, h - 8], radius=38, fill=pal["fill"], outline=pal["outline"], width=3)
         draw.rounded_rectangle([13, 13, w - 13, h - 13], radius=34, outline=(255, 255, 255, 45), width=1)
         
-        font = ImageFont.truetype(FONT_PATH, 40)
-        reshaped = arabic_reshaper.reshape(title_text)
-        bidi_txt = get_display(reshaped)
-        
-        bbox = draw.textbbox((0, 0), bidi_txt, font=font)
+        formatted_txt, text_kwargs = self.format_arabic_for_render(title_text)
+        font_size = 38
+        font = ImageFont.truetype(FONT_PATH, font_size)
+        bbox = draw.textbbox((0, 0), formatted_txt, font=font, **text_kwargs)
         tw = bbox[2] - bbox[0]
         th = bbox[3] - bbox[1]
+        while tw > (w - 70) and font_size > 22:
+            font_size -= 2
+            font = ImageFont.truetype(FONT_PATH, font_size)
+            bbox = draw.textbbox((0, 0), formatted_txt, font=font, **text_kwargs)
+            tw = bbox[2] - bbox[0]
+            th = bbox[3] - bbox[1]
         
         tx = (w - tw) // 2
         ty = (h - th) // 2 - 4
         
         # Shadow & text
-        draw.text((tx + 2, ty + 2), bidi_txt, font=font, fill=(0, 0, 0, 200))
-        draw.text((tx, ty), bidi_txt, font=font, fill=(255, 255, 255, 255), stroke_fill=(15, 20, 35, 255), stroke_width=2)
+        draw.text((tx + 2, ty + 2), formatted_txt, font=font, fill=(0, 0, 0, 200), **text_kwargs)
+        draw.text((tx, ty), formatted_txt, font=font, fill=(255, 255, 255, 255), stroke_fill=(15, 20, 35, 255), stroke_width=2, **text_kwargs)
         
         out_path.parent.mkdir(parents=True, exist_ok=True)
         img.save(out_path)
@@ -153,24 +171,26 @@ class AnimationEngine:
         draw.rounded_rectangle([10, 10, w - 10, h - 10], radius=45, fill=(16, 20, 36, 230), outline=(255, 205, 40, 245), width=4)
         draw.rounded_rectangle([16, 16, w - 16, h - 16], radius=40, outline=(255, 255, 255, 60), width=1)
         
-        full_text = f"{text} {emoji}" if emoji else text
-        reshaped = arabic_reshaper.reshape(full_text)
-        bidi_txt = get_display(reshaped)
-        
-        font_size = 46 if len(text) < 45 else 38
+        formatted_txt, text_kwargs = self.format_arabic_for_render(text)
+        font_size = 46 if len(formatted_txt) < 38 else (38 if len(formatted_txt) < 60 else 32)
         font = ImageFont.truetype(FONT_PATH, font_size)
-        
-        bbox = draw.textbbox((0, 0), bidi_txt, font=font)
+        bbox = draw.textbbox((0, 0), formatted_txt, font=font, **text_kwargs)
         tw = bbox[2] - bbox[0]
         th = bbox[3] - bbox[1]
+        while tw > (w - 70) and font_size > 22:
+            font_size -= 2
+            font = ImageFont.truetype(FONT_PATH, font_size)
+            bbox = draw.textbbox((0, 0), formatted_txt, font=font, **text_kwargs)
+            tw = bbox[2] - bbox[0]
+            th = bbox[3] - bbox[1]
         
         tx = (w - tw) // 2
         ty = (h - th) // 2 - 6
         
         # Drop shadow
-        draw.text((tx + 3, ty + 3), bidi_txt, font=font, fill=(0, 0, 0, 220))
+        draw.text((tx + 3, ty + 3), formatted_txt, font=font, fill=(0, 0, 0, 220), **text_kwargs)
         # Text
-        draw.text((tx, ty), bidi_txt, font=font, fill=(255, 255, 255, 255), stroke_fill=(10, 15, 25, 255), stroke_width=3)
+        draw.text((tx, ty), formatted_txt, font=font, fill=(255, 255, 255, 255), stroke_fill=(10, 15, 25, 255), stroke_width=3, **text_kwargs)
         
         out_path.parent.mkdir(parents=True, exist_ok=True)
         img.save(out_path)
@@ -312,7 +332,7 @@ class AnimationEngine:
 
         # Step 2: Render Top Header Badge with Theme Colors
         header_path = work_dir / "header_badge.png"
-        header_text = f"🌟 حِكَايَاتُ العَجَائِب | {topic_title.split(':')[0].strip()} 🌟"
+        header_text = f"حِكَايَاتُ العَجَائِب | {topic_title.split(':')[0].strip()}"
         self.create_header_badge(header_text, header_path, theme=style_info["theme"])
 
         # Step 3: Render Floating Animated Elements
