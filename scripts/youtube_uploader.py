@@ -93,7 +93,7 @@ def upload_video(
     tags,
     category_id="27",  # 27 = Education
     privacy_status="public",  # Direct public publishing
-    made_for_kids=True,
+    made_for_kids=False,
     thumbnail_path=None
 ):
     """Upload a video file to YouTube with metadata and kid-safety flags."""

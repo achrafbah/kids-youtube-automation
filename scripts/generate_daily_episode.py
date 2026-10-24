@@ -961,7 +961,7 @@ def execute_daily_run():
         description=description,
         tags=tags,
         privacy_status="public",  # Direct Public Publishing
-        made_for_kids=True,
+        made_for_kids=False,
         thumbnail_path=str(scene_file)
     )
 
