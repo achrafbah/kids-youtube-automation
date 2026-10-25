@@ -1,8 +1,10 @@
 """Algorithmic Analytics Pacing Engine for Tales of Wonder.
 Monitors the view velocity of the latest published video on YouTube/TikTok:
-1. If the latest video is actively surging in views, delay the next drop to avoid cannibalizing viral momentum.
-2. If the video has stagnated/plateaued, initiate a 1-hour grace period, then GREENLIGHT the next drop.
-3. Enforces a strict daily limit of MAXIMUM 3 VIDEOS PER DAY throughout the day.
+1. Target: Exactly 3 videos per day.
+2. If the latest video is actively surging in views, delay the next drop to avoid cannibalizing viral momentum.
+3. If the video has stagnated/plateaued, initiate a strict 1-hour grace period.
+4. Only after the full 1-hour grace period has elapsed after stagnation, GREENLIGHT the next video drop.
+5. Enforces a strict daily limit of MAXIMUM 3 VIDEOS PER DAY.
 """
 
 import os
@@ -29,10 +31,10 @@ TOPICS_FILE = DATA_DIR / "topics_history.json"
 TIKTOK_HISTORY_FILE = DATA_DIR / "tiktok_upload_history.json"
 ANALYTICS_CACHE_FILE = DATA_DIR / "video_analytics_cache.json"
 
-MAX_DAILY_VIDEOS = 3          # Maximum 3 videos / day
-MIN_SEED_HOURS = 1.5          # Minimum breathing time for initial seed audience test
-POST_STAGNATION_WAIT_HOURS = 1.0  # Wait ~1h after stagnation before dropping next video
-MAX_CEILING_HOURS = 6.0       # If video has been live for >6h and daily cap not reached, allow next drop
+MAX_DAILY_VIDEOS = 3              # Exactly 3 videos / day
+MIN_SEED_HOURS = 1.5              # Minimum breathing time right after upload
+POST_STAGNATION_WAIT_MINS = 60.0  # Exactly 1 hour grace period after stagnation
+SURGE_VELOCITY_THRESHOLD = 15     # Views gained over recent window to consider surging
 
 def load_json(path: Path) -> dict:
     if path.exists():
@@ -50,7 +52,6 @@ def save_json(path: Path, data: dict):
 def extract_youtube_video_id(url: str) -> Optional[str]:
     if not url:
         return None
-    # Support https://youtu.be/ID and https://www.youtube.com/watch?v=ID and https://youtube.com/shorts/ID
     m = re.search(r"(?:youtu\.be/|v=|shorts/)([A-Za-z0-9_-]{11})", url)
     return m.group(1) if m else None
 
@@ -93,7 +94,7 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     if now_utc is None:
         now_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    # 0. Enforce Daytime Waking Hours Window (La Journée: 08:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
+    # 0. Enforce Daytime Waking Hours Window (08:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
     morocco_time = now_utc + datetime.timedelta(hours=1)
     morocco_hour = morocco_time.hour
     if morocco_hour < 8 or morocco_hour >= 22:
@@ -110,20 +111,20 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     topics_data = load_json(TOPICS_FILE)
     today_count = get_daily_published_count(topics_data, now_utc)
 
-    # 1. Enforce strict daily cap (Max 3 videos/day)
+    # 1. Enforce strict daily cap: Exactly 3 videos / day max
     if today_count >= MAX_DAILY_VIDEOS:
         reason = f"🛑 Daily cap reached: {today_count}/{MAX_DAILY_VIDEOS} videos already published today. System rests until tomorrow."
         return False, reason, {"daily_count": today_count, "cap": MAX_DAILY_VIDEOS}
 
     # 2. If no video published today yet -> Greenlight first video
     if today_count == 0:
-        reason = f"🚀 First video of the day greenlit for publication (0/{MAX_DAILY_VIDEOS} published today)."
+        reason = f"🚀 First video of the day (1/{MAX_DAILY_VIDEOS}) greenlit for publication."
         return True, reason, {"daily_count": 0, "cap": MAX_DAILY_VIDEOS}
 
     # 3. Find latest published video to analyze its growth
     latest_video = get_latest_published_video(topics_data)
     if not latest_video:
-        return True, "🚀 No prior published video found. Greenlit for publication.", {}
+        return True, f"🚀 No prior published video found. Greenlit for publication (video {today_count + 1}/{MAX_DAILY_VIDEOS}).", {}
 
     video_url = latest_video.get("video_url", "")
     video_id = extract_youtube_video_id(video_url)
@@ -139,14 +140,15 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
                 pub_dt = pub_dt.replace(tzinfo=datetime.timezone.utc)
             elapsed_hours = (now_utc - pub_dt).total_seconds() / 3600.0
         except Exception:
-            elapsed_hours = 2.0  # safe assumption if timestamp parsing fails
+            elapsed_hours = 2.0
 
     # 4. Minimum seed testing window: give the video at least 1.5h to breathe
     if elapsed_hours < MIN_SEED_HOURS:
-        reason = f"⏳ Seed audience test active: Latest video '{title}' was published {elapsed_hours:.1f}h ago. Letting it breathe (minimum {MIN_SEED_HOURS}h)."
+        remaining_seed = int((MIN_SEED_HOURS - elapsed_hours) * 60)
+        reason = f"⏳ Seed audience test active: Latest video '{title}' was published {elapsed_hours:.1f}h ago. Letting it breathe ({remaining_seed} mins left of {MIN_SEED_HOURS}h seed window)."
         return False, reason, {"video_id": video_id, "elapsed_hours": elapsed_hours}
 
-    # 5. Fetch live analytics from YouTube
+    # 5. Fetch live analytics from YouTube Data API
     stats = None
     if video_id:
         try:
@@ -176,49 +178,64 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     history = v_cache.get("history", [])
     stagnation_detected_at = v_cache.get("stagnation_detected_at")
 
-    # Check growth velocity across previous snapshots
+    # Calculate recent delta over snapshots taken in the last 60 minutes
     views_surging = False
-    if len(history) >= 2:
-        prev_views = history[-2]["views"]
-        recent_delta = current_views - prev_views if (current_views is not None and prev_views is not None) else 0
-        if recent_delta >= 10:  # Gaining steady views
+    recent_delta = 0
+    if len(history) >= 2 and current_views is not None:
+        # Find oldest snapshot within the last 60 minutes
+        cutoff_dt = now_utc - datetime.timedelta(minutes=60)
+        baseline_views = None
+        for h in history:
+            try:
+                h_dt = datetime.datetime.fromisoformat(h["timestamp"])
+                if h_dt.tzinfo is None:
+                    h_dt = h_dt.replace(tzinfo=datetime.timezone.utc)
+                if h_dt <= cutoff_dt or baseline_views is None:
+                    baseline_views = h["views"]
+            except Exception:
+                pass
+
+        if baseline_views is not None:
+            recent_delta = current_views - baseline_views
+
+        if recent_delta >= SURGE_VELOCITY_THRESHOLD:
             views_surging = True
 
     if views_surging:
-        # Reset stagnation flag because video is active
+        # Video is active and gaining views -> Reset stagnation timer and HOLD
         v_cache["stagnation_detected_at"] = None
         cache[video_id] = v_cache
         save_json(ANALYTICS_CACHE_FILE, cache)
-        reason = f"🔥 Latest video '{title}' is actively surging in views (+{recent_delta} views). Holding next drop to maximize algorithm reach."
-        return False, reason, {"video_id": video_id, "views": current_views, "status": "surging"}
+        reason = f"🔥 Latest video '{title}' is actively surging (+{recent_delta} views recently, now at {current_views}). Holding next drop to maximize algorithmic reach."
+        return False, reason, {"video_id": video_id, "views": current_views, "recent_delta": recent_delta, "status": "surging"}
 
-    # If views are flat/stagnated
+    # Views have flattened out / stagnated
     if stagnation_detected_at is None:
-        # First time detecting stagnation! Start the 1-hour grace timer
+        # First time detecting stagnation! Start the strict 1-hour grace timer
         v_cache["stagnation_detected_at"] = now_iso
         cache[video_id] = v_cache
         save_json(ANALYTICS_CACHE_FILE, cache)
-        reason = f"📉 Stagnation detected on '{title}' ({current_views or 0} views). Starting 1-hour grace timer before next video drop."
+        reason = f"📉 Stagnation detected on '{title}' ({current_views or 0} views). Starting strict 1-hour grace timer before next video drop."
         return False, reason, {"video_id": video_id, "views": current_views, "status": "stagnation_initiated"}
 
-    # Stagnation timer already running: Check elapsed time since stagnation
+    # Stagnation timer is already running: Check elapsed time since stagnation
     try:
         stag_dt = datetime.datetime.fromisoformat(stagnation_detected_at)
         if stag_dt.tzinfo is None:
             stag_dt = stag_dt.replace(tzinfo=datetime.timezone.utc)
-        stag_elapsed_hours = (now_utc - stag_dt).total_seconds() / 3600.0
+        stag_elapsed_mins = (now_utc - stag_dt).total_seconds() / 60.0
     except Exception:
-        stag_elapsed_hours = 1.0
+        stag_elapsed_mins = 0.0
 
-    if stag_elapsed_hours < POST_STAGNATION_WAIT_HOURS and elapsed_hours < MAX_CEILING_HOURS:
-        remaining_mins = int((POST_STAGNATION_WAIT_HOURS - stag_elapsed_hours) * 60)
-        reason = f"⏳ 1-Hour grace period active: Video stagnated {stag_elapsed_hours:.1f}h ago. Waiting {remaining_mins} more minutes before dropping next video."
-        return False, reason, {"video_id": video_id, "stag_elapsed_hours": stag_elapsed_hours}
+    if stag_elapsed_mins < POST_STAGNATION_WAIT_MINS:
+        remaining_mins = int(POST_STAGNATION_WAIT_MINS - stag_elapsed_mins)
+        reason = f"⏳ 1-Hour grace period active: Video stagnated {int(stag_elapsed_mins)} mins ago. Waiting {remaining_mins} more minutes before dropping next video."
+        return False, reason, {"video_id": video_id, "stag_elapsed_mins": stag_elapsed_mins, "remaining_mins": remaining_mins}
 
-    # Stagnation confirmed + 1 hour grace period elapsed + daily count < 3 -> GREENLIGHT!
+    # Stagnation confirmed + full 1 hour grace period elapsed + daily count < 3 -> GREENLIGHT!
     cache[video_id] = v_cache
     save_json(ANALYTICS_CACHE_FILE, cache)
-    reason = f"✅ Algorithmic greenlight: Latest video stagnated for {stag_elapsed_hours:.1f}h. Ready to launch episode {today_count + 1}/{MAX_DAILY_VIDEOS} today!"
+    reason = f"✅ Algorithmic greenlight: Latest video stagnated for {stag_elapsed_mins / 60.0:.1f}h. Ready to launch episode {today_count + 1}/{MAX_DAILY_VIDEOS} today!"
     return True, reason, {"daily_count": today_count, "cap": MAX_DAILY_VIDEOS, "video_id": video_id}
 
 if __name__ == "__main__":
