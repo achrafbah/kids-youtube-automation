@@ -39,6 +39,25 @@
     }
     a { color: #38bdf8; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    .auth-card {
+      display: none;
+      background: #064e3b;
+      border: 1px solid #10b981;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      word-break: break-all;
+    }
+    .code-box {
+      background: #022c22;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #34d399;
+      margin-top: 10px;
+      user-select: all;
+    }
     .footer {
       margin-top: 40px;
       padding-top: 20px;
@@ -52,6 +71,13 @@
   <div class="container">
     <h1>🌟 Tales of Wonder (حكايات العجائب)</h1>
     <div class="badge">Official Automation & Community Hub</div>
+
+    <!-- Dynamic OAuth Callback Receiver -->
+    <div id="auth-card" class="auth-card">
+      <h3 style="color:#6ee7b7; margin-top:0;">🎉 TikTok Authorization Successful!</h3>
+      <p style="color:#d1fae5;">Copy the authorization code below and paste it in chat:</p>
+      <div id="auth-code" class="code-box">...</div>
+    </div>
     
     <p>Welcome to <strong>Tales of Wonder</strong>. We produce educational and entertaining 3D animated stories, rhymes, and foundational moral lessons for children aged 3 to 10 across YouTube, TikTok, and digital channels.</p>
 
@@ -75,5 +101,14 @@
       <p>&copy; 2026 Tales of Wonder. All rights reserved. | <a href="https://github.com/achrafbah/kids-youtube-automation">GitHub Project</a></p>
     </div>
   </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      document.getElementById('auth-card').style.display = 'block';
+      document.getElementById('auth-code').innerText = code;
+    }
+  </script>
 </body>
 </html>
