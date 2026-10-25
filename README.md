@@ -1,6 +1,8 @@
 # 🌟 Tales of Wonder — Kids YouTube Automation Engine
 
-Automated daily educational animated Shorts in Modern Standard Arabic for preschool & primary kids (ages 3–10) on YouTube channel **Tales of Wonder**.
+> 📖 **المرجع المركزي الموحد للمشروع:** راجع الملف الشامل [MASTER_PROJECT_CENTRAL.md](MASTER_PROJECT_CENTRAL.md) للاطلاع على كل التفاصيل، الإعدادات، وطريقة العمل الموحدة.
+
+Automated educational animated Shorts in Modern Standard Arabic for preschool & primary kids (ages 3–10) on YouTube channel **Tales of Wonder**.
 
 Runs 100% in the cloud via **GitHub Actions** on a daily schedule without needing your computer powered on.
 
