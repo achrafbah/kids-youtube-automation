@@ -882,13 +882,20 @@ def check_algorithm_pacing_window(history_data, min_hours=5.0):
     return True
 
 def execute_daily_run():
+    from platform_scheduler import check_youtube_pacing, check_tiktok_pacing
+
+    yt_ready, yt_reason = check_youtube_pacing()
+    tt_ready, tt_reason = check_tiktok_pacing()
+
+    print(f"📊 [SCHEDULER STATUS]", flush=True)
+    print(f"   YouTube Shorts: {'✅ READY' if yt_ready else '⏳ PAUSED'} ({yt_reason})", flush=True)
+    print(f"   TikTok:         {'✅ READY' if tt_ready else '⏳ PAUSED'} ({tt_reason})", flush=True)
+
+    if not yt_ready and not tt_ready:
+        print("✅ Both platforms gracefully paused. Peak audience windows & channel momentum protected.", flush=True)
+        sys.exit(0)
 
     topic, history_data = get_next_unique_curriculum_topic()
-
-    # YouTube Shorts Algorithm Pacing Guard (Interval 4 to 6 hours, peak hours only)
-    if not check_algorithm_pacing_window(history_data, min_hours=5.0):
-        print("✅ Cycle gracefully finished without uploading. Channel momentum protected.")
-        sys.exit(0)
     today_str = datetime.date.today().isoformat()
     ep_dir = OUTPUT_DIR / f"{today_str}_{topic['topic_key']}"
     ep_dir.mkdir(parents=True, exist_ok=True)
@@ -960,44 +967,52 @@ def execute_daily_run():
     else:
         print(f"🎬 Video already assembled: {video_path}", flush=True)
 
-    # Step 5: Upload to YouTube as PUBLIC with Advanced SEO
+    # Step 5: Upload to YouTube as PUBLIC with Advanced SEO (if YouTube is in its window)
+    upload_result = None
     seo_package = build_optimized_seo_package(topic)
     title = seo_package["title"]
     description = seo_package["description"]
     tags = seo_package["tags"]
 
-    print(f"🎯 SEO Optimized Title: {title}", flush=True)
-    print(f"🏷️ SEO Tags ({len(tags)} tags, {sum(len(t) for t in tags)} chars): {tags[:6]}...", flush=True)
-    print(f"📝 Hashtags: {seo_package['hashtags']}", flush=True)
+    if yt_ready:
+        print(f"🎯 [YOUTUBE] In peak window: Uploading to YouTube as Public...", flush=True)
+        print(f"🎯 SEO Optimized Title: {title}", flush=True)
+        print(f"🏷️ SEO Tags ({len(tags)} tags): {tags[:6]}...", flush=True)
+        print(f"📝 Hashtags: {seo_package['hashtags']}", flush=True)
 
-    upload_result = upload_video(
-        video_path=video_path,
-        title=title,
-        description=description,
-        tags=tags,
-        privacy_status="public",  # Direct Public Publishing
-        made_for_kids=False,
-        thumbnail_path=str(scene_file)
-    )
-
-    # Step 5b: Multi-Platform Upload to TikTok
-    tiktok_published = False
-    try:
-        from custom_tiktok_uploader import upload_episode_to_tiktok
-        print("📱 [TIKTOK AUTOMATION] Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
-        tiktok_published = upload_episode_to_tiktok(
+        upload_result = upload_video(
             video_path=video_path,
-            title=topic["title_ar"],
-            lesson=topic["lesson"],
-            topic_key=topic["topic_key"],
-            headless=True
+            title=title,
+            description=description,
+            tags=tags,
+            privacy_status="public",  # Direct Public Publishing
+            made_for_kids=False,
+            thumbnail_path=str(scene_file)
         )
-        if tiktok_published:
-            print(f"🎉 [TIKTOK AUTOMATION] Successfully published '{topic['title_ar']}' to TikTok!", flush=True)
-        else:
-            print(f"⚠️ [TIKTOK AUTOMATION] TikTok publish returned non-success flag.", flush=True)
-    except Exception as tiktok_err:
-        print(f"⚠️ [TIKTOK AUTOMATION] TikTok upload notice: {tiktok_err}", flush=True)
+    else:
+        print(f"⏳ [YOUTUBE] Skipping YouTube upload right now: {yt_reason}", flush=True)
+
+    # Step 5b: Multi-Platform Upload to TikTok (if TikTok is in its window)
+    tiktok_published = False
+    if tt_ready:
+        try:
+            from custom_tiktok_uploader import upload_episode_to_tiktok
+            print("📱 [TIKTOK] In peak window: Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
+            tiktok_published = upload_episode_to_tiktok(
+                video_path=video_path,
+                title=topic["title_ar"],
+                lesson=topic["lesson"],
+                topic_key=topic["topic_key"],
+                headless=True
+            )
+            if tiktok_published:
+                print(f"🎉 [TIKTOK] Successfully published '{topic['title_ar']}' to TikTok!", flush=True)
+            else:
+                print(f"⚠️ [TIKTOK] TikTok publish returned non-success flag.", flush=True)
+        except Exception as tiktok_err:
+            print(f"⚠️ [TIKTOK] TikTok upload notice: {tiktok_err}", flush=True)
+    else:
+        print(f"⏳ [TIKTOK] Skipping TikTok upload right now: {tt_reason}", flush=True)
 
     # Step 6: Record history to prevent duplicates
     status_str = "public_published" if (upload_result and upload_result.get("video_url")) else (upload_result.get("status", "upload_pending") if upload_result else "upload_pending")
