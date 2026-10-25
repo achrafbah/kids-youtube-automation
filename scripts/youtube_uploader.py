@@ -84,13 +84,25 @@ def get_authenticated_service():
 
             print("Opening browser for YouTube authorization...")
             try:
-                flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET_FILE), SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    str(CLIENT_SECRET_FILE),
+                    scopes=SCOPES,
+                    redirect_uri="http://localhost:8080/"
+                )
+                auth_url, _ = flow.authorization_url(
+                    prompt="consent",
+                    access_type="offline"
+                )
+                auth_url_file = CREDENTIALS_DIR / "auth_url.txt"
+                with open(auth_url_file, "w", encoding="utf-8") as f:
+                    f.write(auth_url)
+                print(f"Auth URL: {auth_url}", flush=True)
                 creds = flow.run_local_server(
                     port=8080,
                     open_browser=True,
                     access_type="offline",
                     prompt="consent",
-                    timeout_seconds=60
+                    timeout_seconds=300
                 )
             except Exception as auth_err:
                 print(f"⚠️ YouTube authorization could not complete: {auth_err}")
@@ -205,6 +217,30 @@ def upload_video(
             "status": status_val,
             "error": err_msg
         }
+
+def get_video_statistics(video_id: str):
+    """Retrieve views, likes, and comment counts for a given video ID."""
+    youtube = get_authenticated_service()
+    if not youtube or not video_id:
+        return None
+    try:
+        resp = youtube.videos().list(part="statistics,snippet", id=video_id).execute()
+        items = resp.get("items", [])
+        if not items:
+            return None
+        stats = items[0].get("statistics", {})
+        snippet = items[0].get("snippet", {})
+        return {
+            "video_id": video_id,
+            "title": snippet.get("title", ""),
+            "published_at": snippet.get("publishedAt", ""),
+            "view_count": int(stats.get("viewCount", 0)),
+            "like_count": int(stats.get("likeCount", 0)),
+            "comment_count": int(stats.get("commentCount", 0))
+        }
+    except Exception as e:
+        print(f"Warning: Could not fetch video statistics: {e}", flush=True)
+        return None
 
 if __name__ == "__main__":
     youtube = get_authenticated_service()
