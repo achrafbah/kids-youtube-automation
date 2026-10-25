@@ -1,15 +1,20 @@
 """Interactive OAuth Authorization Helper for YouTube API.
-Generates the authorization URL, opens the default browser directly via Windows,
-and listens on a local server to capture the token.
+Opens default browser with matching OAuth state and listens on local server to capture token.
 """
 
 import os
 import sys
 import json
+import secrets
 from pathlib import Path
 
-# Unbuffered stdout
-sys.stdout.reconfigure(line_buffering=True)
+# Fix Windows console encoding for characters & emojis
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 
@@ -32,29 +37,33 @@ def main():
         redirect_uri="http://localhost:8080/"
     )
 
+    state = secrets.token_urlsafe(32)
     auth_url, _ = flow.authorization_url(
         prompt="consent",
         access_type="offline",
-        include_granted_scopes="true"
+        state=state
     )
-
-    print(f"\nAUTH_URL_START\n{auth_url}\nAUTH_URL_END\n", flush=True)
 
     with open(AUTH_URL_FILE, "w", encoding="utf-8") as f:
         f.write(auth_url)
 
-    # Force open browser on Windows
-    try:
-        os.startfile(auth_url)
-        print("Browser launch attempted via os.startfile.", flush=True)
-    except Exception as e:
-        print(f"Could not auto-open browser: {e}", flush=True)
+    print("\n" + "=" * 60)
+    print("YOUTUBE OAUTH AUTHORIZATION URL:")
+    print(auth_url)
+    print("=" * 60 + "\n", flush=True)
 
-    print("Waiting for callback on http://localhost:8080/ ...", flush=True)
+    print("Waiting for authorization on http://localhost:8080/ ...", flush=True)
     try:
-        creds = flow.run_local_server(port=8080, open_browser=False)
-        with open(TOKEN_FILE, "w", encoding="utf-8") as f:
-            f.write(creds.to_json())
+        creds = flow.run_local_server(
+            port=8080,
+            open_browser=True,
+            prompt="consent",
+            access_type="offline",
+            state=state,
+            timeout_seconds=300
+        )
+        with open(TOKEN_FILE, "w", encoding="utf-8") as token_f:
+            token_f.write(creds.to_json())
         print("AUTH_SUCCESS: Token saved successfully!", flush=True)
     except Exception as e:
         print(f"AUTH_ERROR: {e}", flush=True)

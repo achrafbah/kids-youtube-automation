@@ -57,10 +57,17 @@ def get_authenticated_service():
             creds = None
 
     if not creds or not creds.valid:
+        refreshed = False
         if creds and creds.expired and creds.refresh_token:
             print("Refreshing expired YouTube OAuth token...")
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+                refreshed = True
+            except Exception as e:
+                print(f"⚠️ Failed to refresh token ({e}). Re-authorizing...")
+                creds = None
+
+        if not refreshed:
             if not CLIENT_SECRET_FILE.exists():
                 print("=" * 60)
                 print("❌ Fichier `client_secret.json` introuvable !")
@@ -75,14 +82,28 @@ def get_authenticated_service():
                 print("=" * 60)
                 return None
 
-            print("Opening browser for first-time YouTube authorization...")
-            flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET_FILE), SCOPES)
-            creds = flow.run_local_server(port=0)
+            print("Opening browser for YouTube authorization...")
+            try:
+                flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET_FILE), SCOPES)
+                creds = flow.run_local_server(
+                    port=8080,
+                    open_browser=True,
+                    access_type="offline",
+                    prompt="consent",
+                    timeout_seconds=60
+                )
+            except Exception as auth_err:
+                print(f"⚠️ YouTube authorization could not complete: {auth_err}")
+                return None
 
         # Save credentials for future unattended runs
-        with open(TOKEN_FILE, "w", encoding="utf-8") as token_f:
-            token_f.write(creds.to_json())
-        print(f"✅ Authorization token saved successfully to {TOKEN_FILE}")
+        if creds:
+            with open(TOKEN_FILE, "w", encoding="utf-8") as token_f:
+                token_f.write(creds.to_json())
+            print(f"✅ Authorization token saved successfully to {TOKEN_FILE}")
+
+    if not creds or not creds.valid:
+        return None
 
     return build("youtube", "v3", credentials=creds)
 

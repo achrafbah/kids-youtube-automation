@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import time
+import datetime
 from pathlib import Path
 
 # Fix Windows console encoding
@@ -35,7 +36,18 @@ def get_session_cookies():
     odin_tt = "05afa2a9ad6ff5bd77c6242615b72e532245b85986c5790e8b5f49baf470"
     csrf = "cb1ba1fe16f96c1db9fd63c7797e9e31"
     
-    if SESSION_FILE.exists():
+    # 1. Check environment variable first (e.g. in GitHub Actions)
+    env_session = os.environ.get("TIKTOK_SESSION_JSON")
+    if env_session:
+        try:
+            data = json.loads(env_session)
+            session_id = data.get("sessionid", session_id)
+            s_v_web_id = data.get("s_v_web_id", s_v_web_id)
+            odin_tt = data.get("odin_tt", odin_tt)
+            csrf = data.get("passport_csrf_token", csrf)
+        except Exception:
+            pass
+    elif SESSION_FILE.exists():
         try:
             with open(SESSION_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -188,6 +200,66 @@ def upload_to_tiktok(video_path, caption, headless=True):
         time.sleep(2)
         browser.close()
         return published
+
+VIRAL_HASHTAGS = "#fyp #foryou #تربية_الأطفال #أمهات_تيك_توك #قصص_اطفال #تعليم_مبكر #talesofwonder"
+
+def build_tiktok_viral_caption(title, lesson, topic_key=""):
+    """Build high-retention viral caption adapted to the TikTok FYP algorithm."""
+    combined = (title + " " + topic_key).lower()
+    
+    if any(k in combined for k in ["أدب", "أخلاق", "اعتذار", "polite", "respect", "sharing", "sorry", "والدين", "صدق"]):
+        hook = "✨ سر تربوي بسيط كيعلم طفلك الأدب بلا صراخ! 🦁👇"
+        cta_q = "👇 شاركونا فـ التعاليق: واش وليداتكم كيستعملو هاد الكلمات؟"
+    elif any(k in combined for k in ["حروف", "روضة", "لغة", "letters", "arabic", "نطق", "هجائية"]):
+        hook = "🎨 أسهل وأمتع طريقة يتعلم بها طفلك الحروف العربية! 🌟👇"
+        cta_q = "👇 شكون طفلها كيتعلم الحروف دابا؟ كتبو لينا سميتو نشجعوه!"
+    elif any(k in combined for k in ["أرقام", "حساب", "أشكال", "counting", "numbers", "جمع", "أحجام", "رياضيات"]):
+        hook = "💡 كيفاش تحبب الرياضيات والحساب لطفلك فـ دقيقة واحدة؟ 🔢👇"
+        cta_q = "👇 واش كتعجب طفلك مادة الحساب؟ شاركونا تجربتكم فـ التعاليق!"
+    else:
+        hook = "✨ سر تربوي بسيط كيبني شخصية طفلك بالحب والمرح! 🦁👇"
+        cta_q = "👇 شنو أكتر مهارة كتبغيو وليداتكم يتعلموها؟"
+
+    caption = (
+        f"{hook}\n\n"
+        f"📖 {title}\n"
+        f"🎯 {lesson}\n\n"
+        f"💾 احفظي الفيديو عندك (Save) باش ترجعي ليه مع طفلك!\n"
+        f"{cta_q}\n\n"
+        f"{VIRAL_HASHTAGS}"
+    )
+    return caption
+
+def upload_episode_to_tiktok(video_path, title, lesson, topic_key="", headless=True):
+    """Publish a daily episode to TikTok with viral captions and history tracking."""
+    caption = build_tiktok_viral_caption(title, lesson, topic_key)
+    success = upload_to_tiktok(video_path, caption, headless=headless)
+    
+    if success:
+        try:
+            hist_file = BASE_DIR / "data" / "tiktok_upload_history.json"
+            hist = {"uploaded_keys": []}
+            if hist_file.exists():
+                with open(hist_file, "r", encoding="utf-8") as f:
+                    hist = json.load(f)
+            
+            clean_key = topic_key or Path(video_path).parent.name
+            # Check if not already in history
+            existing_keys = {item.get("key") for item in hist.get("uploaded_keys", [])}
+            if clean_key not in existing_keys:
+                hist.setdefault("uploaded_keys", []).append({
+                    "key": clean_key,
+                    "title": title,
+                    "published_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "status": "published"
+                })
+                with open(hist_file, "w", encoding="utf-8") as f:
+                    json.dump(hist, f, indent=2, ensure_ascii=False)
+                print(f"📝 Recorded {clean_key} to tiktok_upload_history.json", flush=True)
+        except Exception as e:
+            print(f"Notice saving tiktok history: {e}", flush=True)
+            
+    return success
 
 if __name__ == "__main__":
     video_arg = r"C:\Users\SetupGame\.gemini\antigravity\scratch\kids-youtube-automation\output\2026-10-17_arabic-letters-saad-daad\episode_shorts.mp4"

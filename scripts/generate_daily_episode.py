@@ -981,23 +981,23 @@ def execute_daily_run():
     )
 
     # Step 5b: Multi-Platform Upload to TikTok
-    tiktok_result = None
+    tiktok_published = False
     try:
-        from tiktok_uploader import upload_video_to_tiktok
-        tiktok_caption = (
-            f"{topic['title_ar']} 🌟\n"
-            f"💡 {topic['lesson']}\n\n"
-            f"#shorts #talesofwonder #تربية_الأطفال #أطفال #قصص_اطفال #تعليم_مبكر #قيم_وأخلاق"
-        )
-        print("📱 Uploading daily episode to TikTok...", flush=True)
-        tiktok_result = upload_video_to_tiktok(
+        from custom_tiktok_uploader import upload_episode_to_tiktok
+        print("📱 [TIKTOK AUTOMATION] Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
+        tiktok_published = upload_episode_to_tiktok(
             video_path=video_path,
-            caption=tiktok_caption,
-            privacy_level="PUBLIC_TO_EVERYONE"
+            title=topic["title_ar"],
+            lesson=topic["lesson"],
+            topic_key=topic["topic_key"],
+            headless=True
         )
-        print(f"✅ TikTok upload status: {tiktok_result.get('status')}", flush=True)
+        if tiktok_published:
+            print(f"🎉 [TIKTOK AUTOMATION] Successfully published '{topic['title_ar']}' to TikTok!", flush=True)
+        else:
+            print(f"⚠️ [TIKTOK AUTOMATION] TikTok publish returned non-success flag.", flush=True)
     except Exception as tiktok_err:
-        print(f"⚠️ TikTok upload notice: {tiktok_err}", flush=True)
+        print(f"⚠️ [TIKTOK AUTOMATION] TikTok upload notice: {tiktok_err}", flush=True)
 
     # Step 6: Record history to prevent duplicates
     status_str = "public_published" if (upload_result and upload_result.get("video_url")) else (upload_result.get("status", "upload_pending") if upload_result else "upload_pending")
@@ -1012,6 +1012,7 @@ def execute_daily_run():
         "scene_name": visual_spec.get("best_matching_scene", topic.get("scene_name")),
         "scene_description": visual_spec.get("scene_description", ""),
         "video_url": upload_result.get("video_url") if upload_result else None,
+        "tiktok_published": tiktok_published,
         "status": status_str
     }
     history_data.setdefault("topics", []).append(new_entry)
@@ -1069,6 +1070,17 @@ def retry_pending_uploads():
             else:
                 print(f"Upload could not complete: {upload_result.get('status') if upload_result else 'unknown'}")
                 break
+
+            if not entry.get("tiktok_published"):
+                try:
+                    from custom_tiktok_uploader import upload_episode_to_tiktok
+                    print(f"📱 Uploading pending episode to TikTok: {entry['title']}...", flush=True)
+                    if upload_episode_to_tiktok(video_path, entry["title"], entry.get("lesson", ""), entry["topic_key"], headless=True):
+                        entry["tiktok_published"] = True
+                        updated = True
+                        print(f"🎉 Successfully published {entry['title']} to TikTok!")
+                except Exception as t_err:
+                    print(f"Notice on TikTok retry: {t_err}")
     if updated:
         save_json(TOPICS_FILE, history_data)
 
