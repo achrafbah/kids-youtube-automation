@@ -132,15 +132,23 @@ def upload_to_tiktok(video_path, caption, headless=True):
                 
         print("✍️ Setting caption and hashtags...", flush=True)
         clean_overlays()
-        editor.click()
+        editor.click(force=True)
         page.keyboard.press("Control+A")
         page.keyboard.press("Backspace")
         time.sleep(0.3)
         
-        for line in caption.split("\n"):
-            page.keyboard.type(line)
-            page.keyboard.press("Enter")
-            time.sleep(0.05)
+        # Use document.execCommand('insertText') to prevent Arabic keystroke corruption in Draft.js
+        page.evaluate("""(text) => {
+            const el = document.querySelector("div[contenteditable='true']");
+            if (el) {
+                el.focus();
+                document.execCommand('selectAll', false, null);
+                document.execCommand('delete', false, null);
+                document.execCommand('insertText', false, text);
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }""", caption)
+        time.sleep(1)
             
         print("✅ Caption entered!", flush=True)
         clean_overlays()
@@ -201,32 +209,36 @@ def upload_to_tiktok(video_path, caption, headless=True):
         browser.close()
         return published
 
-VIRAL_HASHTAGS = "#fyp #foryou #تربية_الأطفال #أمهات_تيك_توك #قصص_اطفال #تعليم_مبكر #talesofwonder"
+from tiktok_viral_engine import get_topic_hashtags
 
 def build_tiktok_viral_caption(title, lesson, topic_key=""):
-    """Build high-retention viral caption adapted to the TikTok FYP algorithm."""
-    combined = (title + " " + topic_key).lower()
+    """Build high-retention viral caption adapted to the TikTok FYP algorithm with targeted explore tags."""
+    combined = (title + " " + lesson + " " + topic_key).lower()
     
     if any(k in combined for k in ["أدب", "أخلاق", "اعتذار", "polite", "respect", "sharing", "sorry", "والدين", "صدق"]):
         hook = "✨ سر تربوي بسيط كيعلم طفلك الأدب بلا صراخ! 🦁👇"
         cta_q = "👇 شاركونا فـ التعاليق: واش وليداتكم كيستعملو هاد الكلمات؟"
+    elif any(k in combined for k in ["نظافة", "أسنان", "اسنان", "brush", "teeth"]):
+        hook = "🪥 أسهل حيلة تخلي طفلك يحب غسيل الأسنان بلا عناد! ✨👇"
+        cta_q = "👇 واش طفلك كيعكز على غسيل أسنانه؟ شاركونا تجربتكم!"
     elif any(k in combined for k in ["حروف", "روضة", "لغة", "letters", "arabic", "نطق", "هجائية"]):
         hook = "🎨 أسهل وأمتع طريقة يتعلم بها طفلك الحروف العربية! 🌟👇"
         cta_q = "👇 شكون طفلها كيتعلم الحروف دابا؟ كتبو لينا سميتو نشجعوه!"
-    elif any(k in combined for k in ["أرقام", "حساب", "أشكال", "counting", "numbers", "جمع", "أحجام", "رياضيات"]):
+    elif any(k in combined for k in ["أرقام", "ارقام", "حساب", "أشكال", "counting", "numbers", "جمع", "أحجام", "رياضيات"]):
         hook = "💡 كيفاش تحبب الرياضيات والحساب لطفلك فـ دقيقة واحدة؟ 🔢👇"
         cta_q = "👇 واش كتعجب طفلك مادة الحساب؟ شاركونا تجربتكم فـ التعاليق!"
     else:
-        hook = "✨ سر تربوي بسيط كيبني شخصية طفلك بالحب والمرح! 🦁👇"
+        hook = "🌟 قصة كرتونية هادفة تبني شخصية طفلك بالحب والمرح! 👧👦👇"
         cta_q = "👇 شنو أكتر مهارة كتبغيو وليداتكم يتعلموها؟"
 
+    tags = get_topic_hashtags(title, lesson)
     caption = (
         f"{hook}\n\n"
         f"📖 {title}\n"
         f"🎯 {lesson}\n\n"
         f"💾 احفظي الفيديو عندك (Save) باش ترجعي ليه مع طفلك!\n"
         f"{cta_q}\n\n"
-        f"{VIRAL_HASHTAGS}"
+        f"{' '.join(tags)}"
     )
     return caption
 

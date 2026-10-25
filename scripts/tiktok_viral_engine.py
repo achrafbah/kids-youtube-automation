@@ -18,7 +18,10 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-from tiktok_uploader.upload import upload_video
+try:
+    from tiktok_uploader.upload import upload_video
+except ImportError:
+    upload_video = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -77,35 +80,97 @@ def save_upload_history(history):
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
 
+def get_topic_hashtags(title, lesson):
+    """
+    Generate highly targeted, high-traffic Explore/FYP hashtags tailored to the video's theme.
+    Uses high-volume searchable tags (no Hamza on Alif for maximum search matches) + regional affinity tag.
+    """
+    t_lower = (title + " " + lesson).lower()
+    
+    if any(k in t_lower for k in ["حروف", "روضة", "هجاء", "ألف", "باء", "تاء", "letters", "alphabet"]):
+        return [
+            "#تعليم_الاطفال",
+            "#حروف_الهجاء",
+            "#اطفال_ومواهب",
+            "#قصص_اطفال",
+            "#امهات_تيك_توك",
+            "#learnarabic",
+            "#المغرب"
+        ]
+    elif any(k in t_lower for k in ["أرقام", "ارقام", "حساب", "عد", "جمع", "numbers", "counting", "math"]):
+        return [
+            "#تعليم_الاطفال",
+            "#رياضيات_اطفال",
+            "#حساب_ذهني",
+            "#اطفال_ومواهب",
+            "#قصص_اطفال",
+            "#تأسيس_اطفال",
+            "#المغرب"
+        ]
+    elif any(k in t_lower for k in ["أشكال", "اشكال", "ألوان", "الوان", "أحجام", "احجام", "shapes", "colors"]):
+        return [
+            "#تعليم_الاطفال",
+            "#الوان_واشكال",
+            "#تأسيس_اطفال",
+            "#اطفال_ومواهب",
+            "#كرتون_اطفال",
+            "#امهات_تيك_توك",
+            "#المغرب"
+        ]
+    elif any(k in t_lower for k in ["أدب", "أخلاق", "اخلاق", "اعتذار", "والدين", "صدق", "نظافة", "اسنان", "polite", "respect"]):
+        return [
+            "#تربية_الاطفال",
+            "#قصص_اطفال",
+            "#كرتون_اطفال",
+            "#تعديل_سلوك",
+            "#اطفال_ومواهب",
+            "#امهات_تيك_توك",
+            "#المغرب"
+        ]
+    else:
+        return [
+            "#تعليم_الاطفال",
+            "#قصص_اطفال",
+            "#كرتون_اطفال",
+            "#اطفال_ومواهب",
+            "#امهات_تيك_توك",
+            "#learnarabic",
+            "#المغرب"
+        ]
+
 def build_viral_caption(title, lesson):
     """
     Construct a high-retention, high-engagement TikTok viral caption.
     1. Hook for parents (Lines 1-2)
     2. Moral Lesson summary
     3. CTA for Saves & Comments (TikTok's #1 ranking signals)
-    4. Strategic 5-tag cluster
+    4. Strategic Explore tag cluster
     """
-    t_lower = title.lower()
-    if any(k in t_lower or k in title for k in ["أدب", "أخلاق", "اعتذار", "polite", "respect", "sharing", "sorry"]):
+    t_lower = (title + " " + lesson).lower()
+    if any(k in t_lower for k in ["أدب", "أخلاق", "اعتذار", "والدين", "polite", "respect", "sharing", "sorry"]):
         hook = "✨ سر تربوي بسيط كيعلم طفلك الأدب بلا صراخ! 🦁👇"
         cta_q = "👇 شاركونا فـ التعاليق: واش وليداتكم كيستعملو هاد الكلمات؟"
-    elif any(k in t_lower or k in title for k in ["حروف", "روضة", "لغة", "letters", "arabic"]):
-        hook = "🎨 أسهل وأمتع طريقة يتعلم بها طفلك الحروف العربية! 🌟"
+    elif any(k in t_lower for k in ["نظافة", "أسنان", "اسنان", "brush", "teeth"]):
+        hook = "🪥 أسهل حيلة تخلي طفلك يحب غسيل الأسنان بلا عناد! ✨👇"
+        cta_q = "👇 واش طفلك كيعكز على غسيل أسنانه؟ شاركونا تجربتكم!"
+    elif any(k in t_lower for k in ["حروف", "روضة", "لغة", "letters", "arabic"]):
+        hook = "🎨 أسهل وأمتع طريقة يتعلم بها طفلك الحروف العربية! 🌟👇"
         cta_q = "👇 شكون طفلها كيتعلم الحروف دابا؟ كتبو لينا سميتو نشجعوه!"
-    elif any(k in t_lower or k in title for k in ["أرقام", "حساب", "أشكال", "counting", "numbers"]):
-        hook = "💡 كيفاش تحبب الرياضيات والأرقام لطفلك فـ دقيقة واحدة؟ 🔢"
-        cta_q = "👇 واش كتعجب طفلك مادة الحساب؟ شاركونا تجربتكم!"
+    elif any(k in t_lower for k in ["أرقام", "ارقام", "حساب", "أشكال", "counting", "numbers"]):
+        hook = "💡 كيفاش تحبب الرياضيات والأرقام لطفلك فـ دقيقة واحدة؟ 🔢👇"
+        cta_q = "👇 واش كتعجب طفلك مادة الحساب؟ شاركونا تجربتكم فـ التعاليق!"
     else:
-        hook = "🌟 قصة كرتونية هادفة تبني شخصية طفلك بالحب والمرح! 👧👦"
+        hook = "🌟 قصة كرتونية هادفة تبني شخصية طفلك بالحب والمرح! 👧👦👇"
         cta_q = "👇 شنو أكتر صفة كتبغيو وليداتكم يتعلموها؟"
 
+    tags = get_topic_hashtags(title, lesson)
     caption = (
         f"{hook}\n\n"
         f"📖 {title}\n"
         f"🎯 {lesson}\n\n"
         f"💾 احفظي الفيديو عندك (Save) باش ترجعي ليه مع طفلك!\n"
         f"{cta_q}\n\n"
-        f"{' '.join(VIRAL_HASHTAGS)}"
+        f"{' '.join(tags)}"
     )
     return caption
 

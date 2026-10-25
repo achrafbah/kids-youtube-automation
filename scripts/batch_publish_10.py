@@ -24,6 +24,7 @@ HISTORY_FILE = DATA_DIR / "tiktok_upload_history.json"
 
 sys.path.insert(0, str(BASE_DIR / "scripts"))
 from custom_tiktok_uploader import upload_to_tiktok
+from tiktok_viral_engine import get_topic_hashtags
 
 LAST_10_KEYS = [
     "2026-10-17_arabic-letters-raa-zay",
@@ -51,8 +52,6 @@ TITLES_MAP = {
     "2026-10-25_counting-numbers-11-to-15": ("عد الأرقام الكبيرة من 11 إلى 15 🚀", "خطوة متقدمة وممتعة فـ تعلم الأرقام للأطفال الصغار")
 }
 
-VIRAL_TAGS = "#fyp #foryou #تربية_الأطفال #أمهات_تيك_توك #قصص_اطفال #تعليم_مبكر #talesofwonder"
-
 def build_caption(key):
     title, lesson = TITLES_MAP.get(key, ("حكايات العجائب", "محتوى تربوي هادف"))
     
@@ -66,13 +65,14 @@ def build_caption(key):
         hook = "✨ سر تربوي بسيط كيبني شخصية طفلك بالحب والمرح! 🦁👇"
         cta_q = "👇 شنو أكتر مهارة كتبغيو وليداتكم يتعلموها؟"
 
+    tags = get_topic_hashtags(title, lesson)
     caption = (
         f"{hook}\n\n"
         f"📖 {title}\n"
         f"🎯 {lesson}\n\n"
         f"💾 احفظي الفيديو عندك (Save) باش ترجعي ليه مع طفلك!\n"
         f"{cta_q}\n\n"
-        f"{VIRAL_TAGS}"
+        f"{' '.join(tags)}"
     )
     return caption
 
