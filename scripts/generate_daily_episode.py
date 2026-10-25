@@ -906,44 +906,59 @@ def execute_daily_run():
                 break
 
     # Step 1: Script Analysis & Visual/Animation Design (Intila9an men script -> image & animation)
-    print("🎨 Art Director AI analyzing script to design custom 3D visual & animation...", flush=True)
-    art_director = ArtDirectorAgent()
-    visual_spec = art_director.analyze_script_and_design_visuals(
-        script_text=topic["script"],
-        title=topic["title_ar"],
-        pillar=topic["pillar"]
-    )
-    print(f"🎬 Visual Description: {visual_spec.get('scene_description')}", flush=True)
-    print(f"🎨 Theme: {visual_spec.get('theme_palette')} | Particles: {visual_spec.get('particle1')} {visual_spec.get('particle2')} | Cam Profile: #{visual_spec.get('camera_style')}", flush=True)
+    prompt_json = ep_dir / "scene_prompt.json"
+    if prompt_json.exists():
+        visual_spec = load_json(prompt_json)
+        print("🎨 Loaded existing visual spec from cache.", flush=True)
+    else:
+        print("🎨 Art Director AI analyzing script to design custom 3D visual & animation...", flush=True)
+        art_director = ArtDirectorAgent()
+        visual_spec = art_director.analyze_script_and_design_visuals(
+            script_text=topic["script"],
+            title=topic["title_ar"],
+            pillar=topic["pillar"]
+        )
+        print(f"🎬 Visual Description: {visual_spec.get('scene_description')}", flush=True)
+        print(f"🎨 Theme: {visual_spec.get('theme_palette')} | Particles: {visual_spec.get('particle1')} {visual_spec.get('particle2')} | Cam Profile: #{visual_spec.get('camera_style')}", flush=True)
 
-    # Save visual prompt and specification for full transparency & tracking
-    with open(ep_dir / "scene_prompt.json", "w", encoding="utf-8") as pf:
-        json.dump(visual_spec, pf, ensure_ascii=False, indent=2)
-    with open(ep_dir / "scene_prompt.txt", "w", encoding="utf-8") as pf:
-        pf.write(visual_spec.get("image_prompt", ""))
+        # Save visual prompt and specification for full transparency & tracking
+        with open(ep_dir / "scene_prompt.json", "w", encoding="utf-8") as pf:
+            json.dump(visual_spec, pf, ensure_ascii=False, indent=2)
+        with open(ep_dir / "scene_prompt.txt", "w", encoding="utf-8") as pf:
+            pf.write(visual_spec.get("image_prompt", ""))
 
     # Step 2: Generate or Resolve Scene Image from script spec
-    scene_file = art_director.generate_or_resolve_scene_image(
-        visual_spec=visual_spec,
-        output_path=scene_file,
-        last_used_scene=last_used_scene
-    )
+    if not scene_file.exists():
+        art_director = ArtDirectorAgent()
+        scene_file = art_director.generate_or_resolve_scene_image(
+            visual_spec=visual_spec,
+            output_path=scene_file,
+            last_used_scene=last_used_scene
+        )
+    else:
+        print(f"🖼️ Scene canvas already generated: {scene_file}", flush=True)
 
     # Step 3: Storytelling Voiceover via Gemini 3.8 Flash TTS
-    generate_voiceover(topic["script"], audio_path)
+    if not audio_path.exists():
+        generate_voiceover(topic["script"], audio_path)
+    else:
+        print(f"🎙️ Voiceover already generated: {audio_path}", flush=True)
 
     # Step 4: Video Assembly with Dynamic Script-Driven Animation & Cinematography
-    assemble_video(
-        image_path=scene_file,
-        audio_path=audio_path,
-        bgm_path=BGM_FILE,
-        output_video_path=video_path,
-        topic_title=topic["title_ar"],
-        script_text=topic["script"],
-        theme_palette=visual_spec.get("theme_palette"),
-        particles=(visual_spec.get("particle1", "⭐"), visual_spec.get("particle2", "✨")),
-        camera_profile=visual_spec.get("camera_style")
-    )
+    if not video_path.exists():
+        assemble_video(
+            image_path=scene_file,
+            audio_path=audio_path,
+            bgm_path=BGM_FILE,
+            output_video_path=video_path,
+            topic_title=topic["title_ar"],
+            script_text=topic["script"],
+            theme_palette=visual_spec.get("theme_palette"),
+            particles=(visual_spec.get("particle1", "⭐"), visual_spec.get("particle2", "✨")),
+            camera_profile=visual_spec.get("camera_style")
+        )
+    else:
+        print(f"🎬 Video already assembled: {video_path}", flush=True)
 
     # Step 5: Upload to YouTube as PUBLIC with Advanced SEO
     seo_package = build_optimized_seo_package(topic)
@@ -966,6 +981,7 @@ def execute_daily_run():
     )
 
     # Step 6: Record history to prevent duplicates
+    status_str = "public_published" if (upload_result and upload_result.get("video_url")) else (upload_result.get("status", "upload_pending") if upload_result else "upload_pending")
     new_entry = {
         "topic_key": topic["topic_key"],
         "date": today_str,
@@ -977,19 +993,69 @@ def execute_daily_run():
         "scene_name": visual_spec.get("best_matching_scene", topic.get("scene_name")),
         "scene_description": visual_spec.get("scene_description", ""),
         "video_url": upload_result.get("video_url") if upload_result else None,
-        "status": "public_published"
+        "status": status_str
     }
     history_data.setdefault("topics", []).append(new_entry)
     save_json(TOPICS_FILE, history_data)
 
     print("\n" + "=" * 50)
-    print("🎉 DAILY RUN COMPLETE!")
+    print("🎉 DAILY RUN FINISHED!")
     print(f"Pillar: {topic['pillar']}")
     print(f"Title: {topic['title_ar']}")
-    if upload_result:
+    if upload_result and upload_result.get("video_url"):
         print(f"Public URL: {upload_result['video_url']}")
+    else:
+        print(f"Status: {status_str} (Local video saved: {video_path})")
     print("=" * 50)
     return new_entry
 
+def retry_pending_uploads():
+    history_data = load_json(TOPICS_FILE)
+    topics = history_data.get("topics", [])
+    updated = False
+    for entry in topics:
+        if entry.get("status") in ["upload_limit_exceeded", "upload_pending", "upload_failed"]:
+            print(f"🔄 Retrying upload for: {entry['title']} ({entry['topic_key']})...", flush=True)
+            ep_dir = OUTPUT_DIR / f"{entry['date']}_{entry['topic_key']}"
+            video_path = ep_dir / "episode_shorts.mp4"
+            scene_file = ep_dir / "scene_canvas.jpg"
+            if not video_path.exists():
+                print(f"Video file missing at {video_path}, skipping.", flush=True)
+                continue
+
+            title = f"{entry['title']} | برنامج الروضة والأخلاق 🌟"
+            description = (
+                f"مرحباً بكم في حكايات العجائب (Tales of Wonder)! 🌟\n\n"
+                f"المحور: {entry['pillar']}\n"
+                f"💡 موضوع اليوم: {entry['title']}\n"
+                f"🎯 الدرس المستفاد: {entry['lesson']}\n\n"
+                f"محتوى تربوي وتأسيسي هادف للأطفال من 3 إلى 10 سنوات (الروضة والمستوى الأولي).\n\n"
+                f"اشتركوا معنا ليتعلم أطفالكم كل يوم خلقاً جديداً ومعلومة مفيدة!\n\n"
+                f"#shorts #تربية_الطفل #تعليم_مبكر #talesofwonder"
+            )
+            upload_result = upload_video(
+                video_path=video_path,
+                title=title,
+                description=description,
+                tags=["#shorts", "#أطفال", "#تعليم_الروضة", "#talesofwonder"],
+                privacy_status="public",
+                made_for_kids=True,
+                thumbnail_path=str(scene_file) if scene_file.exists() else None
+            )
+            if upload_result and upload_result.get("video_url"):
+                entry["video_url"] = upload_result["video_url"]
+                entry["status"] = "public_published"
+                updated = True
+                print(f"🎉 Successfully published {entry['title']}: {upload_result['video_url']}")
+            else:
+                print(f"Upload could not complete: {upload_result.get('status') if upload_result else 'unknown'}")
+                break
+    if updated:
+        save_json(TOPICS_FILE, history_data)
+
 if __name__ == "__main__":
-    execute_daily_run()
+    if len(sys.argv) > 1 and sys.argv[1] == "--retry-pending":
+        retry_pending_uploads()
+    else:
+        execute_daily_run()
+

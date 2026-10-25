@@ -143,29 +143,47 @@ def upload_video(
         media_body=media
     )
 
-    response = insert_request.execute()
-    video_id = response.get("id")
-    video_url = f"https://youtu.be/{video_id}"
-    print(f"🎉 Upload Complete! Video URL: {video_url}")
+    try:
+        response = insert_request.execute()
+        video_id = response.get("id")
+        video_url = f"https://youtu.be/{video_id}"
+        print(f"🎉 Upload Complete! Video URL: {video_url}")
 
-    # Set custom thumbnail if provided
-    if thumbnail_path and os.path.exists(thumbnail_path) and video_id:
-        try:
-            print("Uploading custom thumbnail...")
-            youtube.thumbnails().set(
-                videoId=video_id,
-                media_body=MediaFileUpload(str(thumbnail_path))
-            ).execute()
-            print("✅ Custom thumbnail uploaded.")
-        except Exception as thumb_err:
-            print(f"Thumbnail upload notice: {thumb_err}")
+        # Set custom thumbnail if provided
+        if thumbnail_path and os.path.exists(thumbnail_path) and video_id:
+            try:
+                print("Uploading custom thumbnail...")
+                youtube.thumbnails().set(
+                    videoId=video_id,
+                    media_body=MediaFileUpload(str(thumbnail_path))
+                ).execute()
+                print("✅ Custom thumbnail uploaded.")
+            except Exception as thumb_err:
+                print(f"Thumbnail upload notice: {thumb_err}")
 
-    return {
-        "video_id": video_id,
-        "video_url": video_url,
-        "title": title,
-        "status": privacy_status
-    }
+        return {
+            "video_id": video_id,
+            "video_url": video_url,
+            "title": title,
+            "status": privacy_status
+        }
+    except Exception as upload_err:
+        err_msg = str(upload_err)
+        print(f"\n⚠️ YouTube Upload Exception: {err_msg}")
+        if "uploadLimitExceeded" in err_msg:
+            print("🛑 YouTube Daily Upload Limit Reached: Channel 'Tales of Wonder' has hit YouTube's rolling 24-hour upload quota.")
+            print("The episode video and assets are completely generated, saved locally, and ready to publish once quota resets.")
+            status_val = "upload_limit_exceeded"
+        else:
+            status_val = "upload_failed"
+
+        return {
+            "video_id": None,
+            "video_url": None,
+            "title": title,
+            "status": status_val,
+            "error": err_msg
+        }
 
 if __name__ == "__main__":
     youtube = get_authenticated_service()
