@@ -290,18 +290,18 @@
       "status": "upload_failed"
     },
     {
-      "topic_key": "primary-colors-magic",
+      "topic_key": "shapes-in-our-house",
       "date": "2026-10-26",
-      "published_at": "2026-10-26T11:12:24.386519+00:00",
+      "published_at": "2026-10-26T12:32:40.158408+00:00",
       "pillar": "الأشكال والألوان (Shapes & Colors)",
-      "title": "سِحْرُ الأَلْوَانِ الأَسَاسِيَّةِ فِي حَيَاتِنَا 🎨🌈",
-      "seo_title": "سحر الألوان الأساسية في حياتنا 🎨🌈 #shorts",
-      "lesson": "التعرف على الألوان الأساسية وتثبيتها من خلال ربطها بالطبيعة.",
-      "scene_name": "custom_omni_ai_render",
-      "scene_description": "Leo in artist smock exploring primary colors in whimsical preschool art garden.",
-      "video_url": "https://youtu.be/fsXoEYVNXMQ",
-      "tiktok_published": false,
-      "status": "draft_private"
+      "title": "نَكْتَشِفُ الأَشْكَالَ دَاخِلَ بَيْتِنَا الجَمِيل 🏠🪟",
+      "seo_title": "نكتشف الأشكال داخل بيتنا الجميل 🏠🪟 #shorts",
+      "lesson": "تطبيق مفاهيم الأشكال الهندسية في البيئة المنزلية للطفل.",
+      "scene_name": "routine_tidying_toys.jpg",
+      "scene_description": "Leo engaging in high-retention preschool activity for نَكْتَشِفُ الأَشْكَالَ دَاخِلَ بَيْتِنَا الجَمِيل 🏠🪟",
+      "video_url": "https://youtu.be/eqD2pErdVFA",
+      "tiktok_published": true,
+      "status": "public_published"
     }
   ],
   "categories_pool": [

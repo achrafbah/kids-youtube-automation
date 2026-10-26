@@ -936,6 +936,9 @@ def execute_daily_run():
             pf.write(visual_spec.get("image_prompt", ""))
 
     # Step 2: Generate or Resolve Scene Image from script spec
+    # Curated topics carry a hand-mapped environment; it always wins for topic relevance.
+    if topic.get("scene_name"):
+        visual_spec["best_matching_scene"] = topic["scene_name"]
     if not scene_file.exists():
         art_director = ArtDirectorAgent()
         scene_file = art_director.generate_or_resolve_scene_image(
@@ -986,7 +989,7 @@ def execute_daily_run():
             title=title,
             description=description,
             tags=tags,
-            privacy_status=os.environ.get("YOUTUBE_PRIVACY_STATUS", "private"),  # Default to Private / Draft
+            privacy_status=os.environ.get("YOUTUBE_PRIVACY_STATUS", "public"),  # Set YOUTUBE_PRIVACY_STATUS=private for draft
             made_for_kids=False,
             thumbnail_path=str(scene_file)
         )
@@ -995,7 +998,7 @@ def execute_daily_run():
 
     # Step 5b: Multi-Platform Upload to TikTok (if TikTok is in its window)
     tiktok_published = False
-    if tt_ready and os.environ.get("YOUTUBE_PRIVACY_STATUS", "private") != "private":
+    if tt_ready and os.environ.get("YOUTUBE_PRIVACY_STATUS", "public") != "private":
         try:
             from custom_tiktok_uploader import upload_episode_to_tiktok
             print("📱 [TIKTOK] In peak window: Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)

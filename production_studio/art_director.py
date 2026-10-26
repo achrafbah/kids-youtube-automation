@@ -124,12 +124,10 @@ Return ONLY a valid JSON object (no markdown, no backticks) with:
             scene_file = self.scenes_dir / "scene_peace_garden.jpg"
             chosen_scene_name = "scene_peace_garden.jpg"
 
-        # Diversity Guard: ensure zero consecutive repetition of scenes across episodes
+        # Topic relevance wins: never swap to an unrelated environment.
+        # Repeats are differentiated by theme palette, particles and camera profile instead.
         if last_used_scene and chosen_scene_name == last_used_scene:
-            cur_idx = ALL_AVAILABLE_SCENES.index(last_used_scene) if last_used_scene in ALL_AVAILABLE_SCENES else 0
-            alt_scene = ALL_AVAILABLE_SCENES[(cur_idx + 1) % len(ALL_AVAILABLE_SCENES)]
-            scene_file = self.scenes_dir / alt_scene
-            self.log(f"🛡️ Diversity Guard: Swapped from '{last_used_scene}' to '{alt_scene}'")
+            self.log(f"ℹ️ Same environment as last episode ('{last_used_scene}') kept for topic relevance.")
 
         # Standardize to 1080x1920 (9:16) with high-fidelity LANCZOS resampling
         img = Image.open(scene_file)
