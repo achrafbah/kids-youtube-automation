@@ -41,6 +41,118 @@ def get_font_path() -> str:
 
 FONT_PATH = get_font_path()
 
+def draw_kawaii_star(target_size=120):
+    scale = 4
+    size = target_size * scale
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    cx, cy = size / 2, size / 2
+    r_outer = size * 0.42
+    r_inner = size * 0.20
+    
+    # Shadow
+    pts_shadow = []
+    for i in range(10):
+        angle = -math.pi / 2 + i * math.pi / 5
+        r = r_outer if i % 2 == 0 else r_inner
+        pts_shadow.append((cx + r * math.cos(angle), cy + r * math.sin(angle) + 12))
+    draw.polygon(pts_shadow, fill=(180, 80, 0, 160))
+
+    # Main golden body
+    pts_main = []
+    for i in range(10):
+        angle = -math.pi / 2 + i * math.pi / 5
+        r = r_outer if i % 2 == 0 else r_inner
+        pts_main.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+    draw.polygon(pts_main, fill=(255, 218, 25, 255), outline=(235, 120, 10, 255), width=7)
+
+    # Highlight on top point
+    pts_hi = [
+        pts_main[0],
+        (cx + (pts_main[1][0] - cx)*0.55, cy + (pts_main[1][1] - cy)*0.55),
+        (cx, cy - r_inner*0.3),
+        (cx + (pts_main[9][0] - cx)*0.55, cy + (pts_main[9][1] - cy)*0.55),
+    ]
+    draw.polygon(pts_hi, fill=(255, 255, 215, 230))
+    
+    # Eyes
+    eye_y = cy - 6 * scale
+    eye_r = 5 * scale
+    draw.ellipse([cx - 18*scale - eye_r, eye_y - eye_r*1.2, cx - 18*scale + eye_r, eye_y + eye_r*1.2], fill=(40, 20, 5, 255))
+    draw.ellipse([cx + 18*scale - eye_r, eye_y - eye_r*1.2, cx + 18*scale + eye_r, eye_y + eye_r*1.2], fill=(40, 20, 5, 255))
+    
+    # Eye shine
+    draw.ellipse([cx - 20*scale, eye_y - eye_r*0.9, cx - 16*scale, eye_y - eye_r*0.1], fill=(255, 255, 255, 255))
+    draw.ellipse([cx + 16*scale, eye_y - eye_r*0.9, cx + 20*scale, eye_y - eye_r*0.1], fill=(255, 255, 255, 255))
+    
+    # Smile
+    draw.arc([cx - 12*scale, cy + 2*scale, cx + 12*scale, cy + 18*scale], start=10, end=170, fill=(180, 50, 0, 255), width=5)
+
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+def draw_sparkle(target_size=120):
+    scale = 4
+    size = target_size * scale
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    cx, cy = size / 2, size / 2
+    r_long = size * 0.44
+    r_short = size * 0.08
+    
+    pts = [
+        (cx, cy - r_long),
+        (cx + r_short, cy - r_short),
+        (cx + r_long, cy),
+        (cx + r_short, cy + r_short),
+        (cx, cy + r_long),
+        (cx - r_short, cy + r_short),
+        (cx - r_long, cy),
+        (cx - r_short, cy - r_short)
+    ]
+    glow = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    g_draw = ImageDraw.Draw(glow)
+    g_draw.polygon(pts, fill=(255, 240, 100, 180))
+    glow = glow.filter(ImageFilter.GaussianBlur(radius=6 * scale // 2))
+    img.alpha_composite(glow)
+    
+    draw.polygon(pts, fill=(255, 255, 240, 255), outline=(255, 215, 0, 255), width=5)
+    draw.ellipse([cx - 6*scale, cy - 6*scale, cx + 6*scale, cy + 6*scale], fill=(255, 255, 255, 255))
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+def draw_heart(target_size=120):
+    scale = 4
+    size = target_size * scale
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    cx, cy = size / 2, size / 2
+    r = size * 0.22
+    s_y = cy + 10
+    draw.ellipse([cx - 2*r, s_y - 1.2*r, cx, s_y + 0.8*r], fill=(120, 10, 30, 140))
+    draw.ellipse([cx, s_y - 1.2*r, cx + 2*r, s_y + 0.8*r], fill=(120, 10, 30, 140))
+    draw.polygon([(cx - 1.9*r, s_y - 0.2*r), (cx + 1.9*r, s_y - 0.2*r), (cx, s_y + 1.9*r)], fill=(120, 10, 30, 140))
+
+    draw.ellipse([cx - 2*r, cy - 1.4*r, cx, cy + 0.6*r], fill=(255, 45, 85, 255))
+    draw.ellipse([cx, cy - 1.4*r, cx + 2*r, cy + 0.6*r], fill=(255, 45, 85, 255))
+    draw.polygon([(cx - 1.9*r, cy - 0.4*r), (cx + 1.9*r, cy - 0.4*r), (cx, cy + 1.7*r)], fill=(255, 45, 85, 255))
+    draw.ellipse([cx - 1.5*r, cy - 1.1*r, cx - 0.5*r, cy - 0.3*r], fill=(255, 180, 200, 220))
+    draw.ellipse([cx - 1.3*r, cy - 0.9*r, cx - 0.8*r, cy - 0.5*r], fill=(255, 255, 255, 240))
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+def draw_bubble(target_size=120):
+    scale = 4
+    size = target_size * scale
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    cx, cy = size / 2, size / 2
+    r = size * 0.40
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(120, 210, 255, 60), outline=(100, 220, 255, 220), width=6)
+    r_in = r * 0.92
+    draw.arc([cx - r_in, cy - r_in, cx + r_in, cy + r_in], start=160, end=290, fill=(255, 255, 255, 230), width=8)
+    shine_r = r * 0.35
+    draw.ellipse([cx - r*0.55 - shine_r, cy - r*0.55 - shine_r*0.6, cx - r*0.55 + shine_r, cy - r*0.55 + shine_r*0.6], fill=(255, 255, 255, 240))
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+
 class AnimationEngine:
     def __init__(self, base_dir: Path):
         self.base_dir = base_dir
@@ -196,117 +308,6 @@ class AnimationEngine:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         img.save(out_path)
         return out_path
-
-def draw_kawaii_star(target_size=120):
-    scale = 4
-    size = target_size * scale
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    cx, cy = size / 2, size / 2
-    r_outer = size * 0.42
-    r_inner = size * 0.20
-    
-    # Shadow
-    pts_shadow = []
-    for i in range(10):
-        angle = -math.pi / 2 + i * math.pi / 5
-        r = r_outer if i % 2 == 0 else r_inner
-        pts_shadow.append((cx + r * math.cos(angle), cy + r * math.sin(angle) + 12))
-    draw.polygon(pts_shadow, fill=(180, 80, 0, 160))
-
-    # Main golden body
-    pts_main = []
-    for i in range(10):
-        angle = -math.pi / 2 + i * math.pi / 5
-        r = r_outer if i % 2 == 0 else r_inner
-        pts_main.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
-    draw.polygon(pts_main, fill=(255, 218, 25, 255), outline=(235, 120, 10, 255), width=7)
-
-    # Highlight on top point
-    pts_hi = [
-        pts_main[0],
-        (cx + (pts_main[1][0] - cx)*0.55, cy + (pts_main[1][1] - cy)*0.55),
-        (cx, cy - r_inner*0.3),
-        (cx + (pts_main[9][0] - cx)*0.55, cy + (pts_main[9][1] - cy)*0.55),
-    ]
-    draw.polygon(pts_hi, fill=(255, 255, 215, 230))
-    
-    # Eyes
-    eye_y = cy - 6 * scale
-    eye_r = 5 * scale
-    draw.ellipse([cx - 18*scale - eye_r, eye_y - eye_r*1.2, cx - 18*scale + eye_r, eye_y + eye_r*1.2], fill=(40, 20, 5, 255))
-    draw.ellipse([cx + 18*scale - eye_r, eye_y - eye_r*1.2, cx + 18*scale + eye_r, eye_y + eye_r*1.2], fill=(40, 20, 5, 255))
-    
-    # Eye shine
-    draw.ellipse([cx - 20*scale, eye_y - eye_r*0.9, cx - 16*scale, eye_y - eye_r*0.1], fill=(255, 255, 255, 255))
-    draw.ellipse([cx + 16*scale, eye_y - eye_r*0.9, cx + 20*scale, eye_y - eye_r*0.1], fill=(255, 255, 255, 255))
-    
-    # Smile
-    draw.arc([cx - 12*scale, cy + 2*scale, cx + 12*scale, cy + 18*scale], start=10, end=170, fill=(180, 50, 0, 255), width=5)
-
-    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
-
-def draw_sparkle(target_size=120):
-    scale = 4
-    size = target_size * scale
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    cx, cy = size / 2, size / 2
-    r_long = size * 0.44
-    r_short = size * 0.08
-    
-    pts = [
-        (cx, cy - r_long),
-        (cx + r_short, cy - r_short),
-        (cx + r_long, cy),
-        (cx + r_short, cy + r_short),
-        (cx, cy + r_long),
-        (cx - r_short, cy + r_short),
-        (cx - r_long, cy),
-        (cx - r_short, cy - r_short)
-    ]
-    glow = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    g_draw = ImageDraw.Draw(glow)
-    g_draw.polygon(pts, fill=(255, 240, 100, 180))
-    glow = glow.filter(ImageFilter.GaussianBlur(radius=6 * scale // 2))
-    img.alpha_composite(glow)
-    
-    draw.polygon(pts, fill=(255, 255, 240, 255), outline=(255, 215, 0, 255), width=5)
-    draw.ellipse([cx - 6*scale, cy - 6*scale, cx + 6*scale, cy + 6*scale], fill=(255, 255, 255, 255))
-    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
-
-def draw_heart(target_size=120):
-    scale = 4
-    size = target_size * scale
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    cx, cy = size / 2, size / 2
-    r = size * 0.22
-    s_y = cy + 10
-    draw.ellipse([cx - 2*r, s_y - 1.2*r, cx, s_y + 0.8*r], fill=(120, 10, 30, 140))
-    draw.ellipse([cx, s_y - 1.2*r, cx + 2*r, s_y + 0.8*r], fill=(120, 10, 30, 140))
-    draw.polygon([(cx - 1.9*r, s_y - 0.2*r), (cx + 1.9*r, s_y - 0.2*r), (cx, s_y + 1.9*r)], fill=(120, 10, 30, 140))
-
-    draw.ellipse([cx - 2*r, cy - 1.4*r, cx, cy + 0.6*r], fill=(255, 45, 85, 255))
-    draw.ellipse([cx, cy - 1.4*r, cx + 2*r, cy + 0.6*r], fill=(255, 45, 85, 255))
-    draw.polygon([(cx - 1.9*r, cy - 0.4*r), (cx + 1.9*r, cy - 0.4*r), (cx, cy + 1.7*r)], fill=(255, 45, 85, 255))
-    draw.ellipse([cx - 1.5*r, cy - 1.1*r, cx - 0.5*r, cy - 0.3*r], fill=(255, 180, 200, 220))
-    draw.ellipse([cx - 1.3*r, cy - 0.9*r, cx - 0.8*r, cy - 0.5*r], fill=(255, 255, 255, 240))
-    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
-
-def draw_bubble(target_size=120):
-    scale = 4
-    size = target_size * scale
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    cx, cy = size / 2, size / 2
-    r = size * 0.40
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(120, 210, 255, 60), outline=(100, 220, 255, 220), width=6)
-    r_in = r * 0.92
-    draw.arc([cx - r_in, cy - r_in, cx + r_in, cy + r_in], start=160, end=290, fill=(255, 255, 255, 230), width=8)
-    shine_r = r * 0.35
-    draw.ellipse([cx - r*0.55 - shine_r, cy - r*0.55 - shine_r*0.6, cx - r*0.55 + shine_r, cy - r*0.55 + shine_r*0.6], fill=(255, 255, 255, 240))
-    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
 
     def create_floating_element(self, emoji: str, out_path: Path) -> Path:
         """Create animated floating transparent cartoon particle asset without font/glyph bugs."""
