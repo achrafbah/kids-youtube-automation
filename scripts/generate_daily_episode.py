@@ -789,16 +789,17 @@ def build_optimized_seo_package(topic: dict) -> dict:
         if ct and ct not in topic_clean_tags:
             topic_clean_tags.append(ct)
 
-    # Combine & deduplicate tags up to 480 characters (YouTube allows max 500)
+    # Combine & deduplicate tags enforcing safe 400 UTF-8 bytes limit (YouTube max 500 bytes)
     final_tags = []
-    total_tag_chars = 0
+    total_tag_bytes = 0
     all_candidates = pillar_tags + universal_tags + topic_clean_tags
     for tag in all_candidates:
-        clean_tag = tag.strip()
+        clean_tag = tag.replace("#", "").replace("<", "").replace(">", "").replace("_", " ").strip()
         if clean_tag and clean_tag not in final_tags:
-            if total_tag_chars + len(clean_tag) + 1 <= 480:
+            t_bytes = len(clean_tag.encode("utf-8")) + 1
+            if total_tag_bytes + t_bytes <= 400:
                 final_tags.append(clean_tag)
-                total_tag_chars += len(clean_tag) + 1
+                total_tag_bytes += t_bytes
 
     # 4. RICH SEO DESCRIPTION
     universal_hashtags = ["#shorts", "#اطفال", "#كرتون_اطفال", "#رسوم_متحركة", "#حكايات_العجائب", "#kids", "#talesofwonder"]

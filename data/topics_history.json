@@ -274,6 +274,34 @@
       "scene_description": "Leo wears a charming space-themed explorer outfit and looks up in wonder, excitedly counting softly glowing star-shaped numbers floating through a magical starry sky.",
       "video_url": null,
       "status": "upload_pending"
+    },
+    {
+      "topic_key": "primary-colors-magic",
+      "date": "2026-10-26",
+      "published_at": "2026-10-26T11:10:40.936799+00:00",
+      "pillar": "الأشكال والألوان (Shapes & Colors)",
+      "title": "سِحْرُ الأَلْوَانِ الأَسَاسِيَّةِ فِي حَيَاتِنَا 🎨🌈",
+      "seo_title": "سحر الألوان الأساسية في حياتنا 🎨🌈 #shorts",
+      "lesson": "التعرف على الألوان الأساسية وتثبيتها من خلال ربطها بالطبيعة.",
+      "scene_name": "scene_art_colors.jpg",
+      "scene_description": "Leo joyfully presents the magic of primary colors in an enchanted open-air art studio garden. Surrounding him are playful floating icons of a shiny red strawberry, a calm blue sea-drop, and a radiant smiling yellow sun.",
+      "video_url": null,
+      "tiktok_published": false,
+      "status": "upload_failed"
+    },
+    {
+      "topic_key": "primary-colors-magic",
+      "date": "2026-10-26",
+      "published_at": "2026-10-26T11:12:24.386519+00:00",
+      "pillar": "الأشكال والألوان (Shapes & Colors)",
+      "title": "سِحْرُ الأَلْوَانِ الأَسَاسِيَّةِ فِي حَيَاتِنَا 🎨🌈",
+      "seo_title": "سحر الألوان الأساسية في حياتنا 🎨🌈 #shorts",
+      "lesson": "التعرف على الألوان الأساسية وتثبيتها من خلال ربطها بالطبيعة.",
+      "scene_name": "custom_omni_ai_render",
+      "scene_description": "Leo in artist smock exploring primary colors in whimsical preschool art garden.",
+      "video_url": "https://youtu.be/fsXoEYVNXMQ",
+      "tiktok_published": false,
+      "status": "draft_private"
     }
   ],
   "categories_pool": [
