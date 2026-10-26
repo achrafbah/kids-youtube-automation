@@ -1,0 +1,53 @@
+{
+  "total_cycles": 2,
+  "learned_rules": [
+    "Prioritize energetic question hooks under 50 characters.",
+    "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'."
+  ],
+  "recent_insights": [
+    {
+      "topic_key": "counting-numbers-11-to-15",
+      "timestamp": "2026-10-26T13:02:36.548833+00:00",
+      "hook_pattern": "Energetic preschool cartoon inquiry hook",
+      "suggested_title": null,
+      "proven_keywords": [
+        "مُغَامَرَةُ الأَرْقَام: نَعُدُّ مِنْ 11 إِلَى 15 🚀✨",
+        "كرتون اطفال",
+        "تعليم الروضة"
+      ],
+      "competitors_analyzed": []
+    },
+    {
+      "topic_key": "counting-numbers-11-to-15",
+      "timestamp": "2026-10-26T13:04:29.823744+00:00",
+      "hook_pattern": "Action-oriented educational hook pairing exact numerical ranges with playful emoji anchors instead of formal series titles.",
+      "suggested_title": "تعلم الأرقام من 11 إلى 15 للأطفال 🔢🚀 #shorts",
+      "proven_keywords": [
+        "تعلم الأرقام للأطفال",
+        "أغنية الأرقام العربية",
+        "تعليم الأرقام من 11 إلى 15",
+        "الأرقام العربية للأطفال",
+        "أغاني أطفال تعليمية",
+        "تعليم مرح للأطفال",
+        "حساب وأرقام للروضة"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "🔢🎵 أغنية الأرقام العربية ⭐✨🔟 تعلم الأرقام العربية 🌟📚🎶🐝Arabic Numbers Song🎈✏️ بابل بيي",
+          "views": 8471801,
+          "channel": "Bubble Bee Edutainment - بابل بيي للتعليم الترفيهي"
+        },
+        {
+          "title": "Numbers 1–10 in English   تعلم الأرقام من 1 إلى 10 بالإنجليزية",
+          "views": 159947,
+          "channel": "English With Yos"
+        },
+        {
+          "title": "3 كرتونات اتمنعت من كرتون نتورك… والسبب غريب! 📺",
+          "views": 935249,
+          "channel": "المحقق اي بوي - Detective E Boy"
+        }
+      ]
+    }
+  ]
+}

@@ -717,7 +717,7 @@ def clean_arabic_text(text: str) -> str:
     cleaned = cleaned.replace('ـ', '')  # Remove tatweel
     return re.sub(r'\s+', ' ', cleaned).strip()
 
-def build_optimized_seo_package(topic: dict) -> dict:
+def build_optimized_seo_package(topic: dict, competitor_insights: dict = None) -> dict:
     """
     Builds maximum-CTR and high-ranking YouTube Shorts metadata:
     1. Short, Hook-focused Title ending with #shorts (strictly under 60-70 chars for mobile feed display)
@@ -729,14 +729,23 @@ def build_optimized_seo_package(topic: dict) -> dict:
     pillar = topic.get("pillar", "")
     lesson = topic.get("lesson", "")
 
-    # 1. OPTIMIZED TITLE (Mobile Shorts Hook)
-    base_title = clean_title.split("|")[0].strip()
-    if "#shorts" not in base_title.lower():
-        if len(base_title) > 52:
-            base_title = base_title[:52].rstrip()
-        optimized_title = f"{base_title} #shorts"
+    # 1. OPTIMIZED TITLE (Mobile Shorts Hook - with Competitor Intelligence)
+    if competitor_insights and competitor_insights.get("suggested_title_hook"):
+        suggested = competitor_insights["suggested_title_hook"].strip()
+        if len(suggested) <= 65 and "#shorts" in suggested.lower():
+            optimized_title = suggested
+            base_title = suggested.replace("#shorts", "").strip()
+        else:
+            base_title = clean_title.split("|")[0].strip()
+            optimized_title = f"{base_title[:52].rstrip()} #shorts" if "#shorts" not in base_title.lower() else base_title[:65]
     else:
-        optimized_title = base_title[:65]
+        base_title = clean_title.split("|")[0].strip()
+        if "#shorts" not in base_title.lower():
+            if len(base_title) > 52:
+                base_title = base_title[:52].rstrip()
+            optimized_title = f"{base_title} #shorts"
+        else:
+            optimized_title = base_title[:65]
 
     # 2. PILLAR MAPPING & TARGETED HASHTAGS
     pillar_lower = pillar.lower()
@@ -792,7 +801,8 @@ def build_optimized_seo_package(topic: dict) -> dict:
     # Combine & deduplicate tags enforcing safe 400 UTF-8 bytes limit (YouTube max 500 bytes)
     final_tags = []
     total_tag_bytes = 0
-    all_candidates = pillar_tags + universal_tags + topic_clean_tags
+    competitor_tags = [clean_arabic_text(t) for t in (competitor_insights.get("suggested_tags", []) if competitor_insights else [])]
+    all_candidates = competitor_tags + pillar_tags + universal_tags + topic_clean_tags
     for tag in all_candidates:
         clean_tag = tag.replace("#", "").replace("<", "").replace(">", "").replace("_", " ").strip()
         if clean_tag and clean_tag not in final_tags:
@@ -971,9 +981,18 @@ def execute_daily_run():
     else:
         print(f"🎬 Video already assembled: {video_path}", flush=True)
 
-    # Step 5: Upload to YouTube as PUBLIC with Advanced SEO (if YouTube is in its window)
+    # Step 5: Competitor Intelligence & Advanced SEO Metadata
+    print("🧠 [INTEL] Running Competitor Intelligence & Real-Time Trend Analysis...", flush=True)
+    competitor_insights = {}
+    try:
+        from competitor_intelligence import CompetitorIntelligenceAgent
+        intel_agent = CompetitorIntelligenceAgent()
+        competitor_insights = intel_agent.analyze_and_learn(topic)
+    except Exception as intel_err:
+        print(f"⚠️ [INTEL] Proceeding with standard SEO package: {intel_err}", flush=True)
+
     upload_result = None
-    seo_package = build_optimized_seo_package(topic)
+    seo_package = build_optimized_seo_package(topic, competitor_insights=competitor_insights)
     title = seo_package["title"]
     description = seo_package["description"]
     tags = seo_package["tags"]
