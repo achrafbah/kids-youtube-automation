@@ -34,7 +34,7 @@ class BaseAgent(ABC):
             for line in open(self.env_file, encoding="utf-8"):
                 if line.startswith("GEMINI_API_KEY="):
                     return line.strip().split("=", 1)[1]
-        return os.environ.get("GEMINI_API_KEY", "")
+        return os.environ.get("GEMINI_API_KEY", "AQ.Ab8RN6Ly6CghBsKIp9KFboAoEWe_N7hlrKwYhzBosimjI_JVrA")
 
     @property
     def client(self) -> genai.Client:
