@@ -297,5 +297,5 @@ def assemble_full_flow_episode(
     return str(final_master_path)
 
 if __name__ == "__main__":
-    from generate_flow_package import PILOT_STORY_SPACE_ADVENTURE
-    assemble_full_flow_episode(PILOT_STORY_SPACE_ADVENTURE, upload_to_youtube=False)
+    from generate_flow_package import LEO_LOST_KITTEN_STORY
+    assemble_full_flow_episode(LEO_LOST_KITTEN_STORY, upload_to_youtube=False)
