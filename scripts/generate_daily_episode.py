@@ -985,7 +985,7 @@ def execute_daily_run():
             title=title,
             description=description,
             tags=tags,
-            privacy_status="public",  # Direct Public Publishing
+            privacy_status=os.environ.get("YOUTUBE_PRIVACY_STATUS", "private"),  # Default to Private / Draft
             made_for_kids=False,
             thumbnail_path=str(scene_file)
         )
@@ -994,7 +994,7 @@ def execute_daily_run():
 
     # Step 5b: Multi-Platform Upload to TikTok (if TikTok is in its window)
     tiktok_published = False
-    if tt_ready:
+    if tt_ready and os.environ.get("YOUTUBE_PRIVACY_STATUS", "private") != "private":
         try:
             from custom_tiktok_uploader import upload_episode_to_tiktok
             print("📱 [TIKTOK] In peak window: Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
