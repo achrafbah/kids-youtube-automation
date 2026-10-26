@@ -741,8 +741,8 @@ def build_optimized_seo_package(topic: dict, competitor_insights: dict = None) -
     else:
         base_title = clean_title.split("|")[0].strip()
         if "#shorts" not in base_title.lower():
-            if len(base_title) > 52:
-                base_title = base_title[:52].rstrip()
+            if len(base_title) > 75:
+                base_title = base_title[:75].rstrip()
             optimized_title = f"{base_title} #shorts"
         else:
             optimized_title = base_title[:65]
