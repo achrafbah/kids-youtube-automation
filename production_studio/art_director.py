@@ -18,6 +18,15 @@ from .base import BaseAgent
 
 ALL_AVAILABLE_SCENES = [
     "leo_brushing_teeth_custom.jpg",
+    "leo_washing_hands_custom.jpg",
+    "leo_tidying_toys_custom.jpg",
+    "leo_healthy_food_custom.jpg",
+    "leo_drinking_water_custom.jpg",
+    "leo_morning_exercise_custom.jpg",
+    "leo_bedtime_story_custom.jpg",
+    "leo_helping_family_custom.jpg",
+    "leo_arabic_alphabet_custom.jpg",
+    "leo_counting_numbers_custom.jpg",
     "scene_animal_kindness.jpg",
     "scene_letters_dal_dhal.jpg",
     "scene_art_colors.jpg",
@@ -186,7 +195,7 @@ Return ONLY a valid JSON object (no markdown, no backticks) with:
         Guarantee: Never reuse an image that was used in ANY previous episode.
         """
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        title = topic.get("title_ar", "") if topic else visual_spec.get("title", "")
+        title = (topic.get("title_ar") or topic.get("title", "")) if topic else (visual_spec.get("title_ar") or visual_spec.get("title", ""))
         script = topic.get("script", "") if topic else visual_spec.get("script", "")
         pillar = topic.get("pillar", "") if topic else visual_spec.get("pillar", "")
 
@@ -213,8 +222,34 @@ Return ONLY a valid JSON object (no markdown, no backticks) with:
                     available_scenes.append(f)
 
         if available_scenes:
-            # Pick an unused scene that best matches
-            selected_scene = available_scenes[0]
+            # Topic-aware matching among strictly UNUSED scenes
+            text_context = (title + " " + script + " " + pillar).lower()
+            selected_scene = None
+            keyword_mappings = [
+                (["أسنان", "اسنان", "فرشاة", "معجون", "teeth", "brush"], "leo_brushing_teeth_custom.jpg"),
+                (["يدين", "صابون", "نظافة اليدين", "جراثيم", "wash", "soap"], "leo_washing_hands_custom.jpg"),
+                (["ترتيب", "ألعاب", "العاب", "صندوق", "غرفة", "tidy", "toys"], "leo_tidying_toys_custom.jpg"),
+                (["طعام", "غذاء", "خضار", "فواكه", "تفاح", "صحة", "food", "fruit"], "leo_healthy_food_custom.jpg"),
+                (["ماء", "شرب", "انتعاش", "عطش", "water", "drink"], "leo_drinking_water_custom.jpg"),
+                (["رياضة", "صباح", "نشاط", "قفز", "طاقة", "sport", "exercise"], "leo_morning_exercise_custom.jpg"),
+                (["نوم", "سرير", "أحلام", "ليل", "نجوم", "sleep", "bedtime"], "leo_bedtime_story_custom.jpg"),
+                (["مساعدة", "والدين", "أخلاق", "تعاون", "شكر", "help", "family"], "leo_helping_family_custom.jpg"),
+                (["حروف", "هجاء", "لغة", "عربية", "قراءة", "alphabet", "letters"], "leo_arabic_alphabet_custom.jpg"),
+                (["أرقام", "ارقام", "حساب", "عد", "رياضيات", "numbers", "counting"], "leo_counting_numbers_custom.jpg"),
+            ]
+            for keywords, target_filename in keyword_mappings:
+                if any(kw in text_context for kw in keywords):
+                    for cand in available_scenes:
+                        if cand.name.lower() == target_filename.lower():
+                            selected_scene = cand
+                            self.log(f"🎯 Perfectly matched topic '{target_filename}' to episode theme!")
+                            break
+                    if selected_scene:
+                        break
+
+            if not selected_scene:
+                selected_scene = available_scenes[0]
+
             self.log(f"✨ Selected unique never-before-used scene: {selected_scene.name}")
             img = Image.open(selected_scene)
             resized = img.resize((1080, 1920), Image.Resampling.LANCZOS)

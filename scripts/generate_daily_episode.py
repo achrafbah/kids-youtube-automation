@@ -536,6 +536,16 @@ CURRICULUM_TOPICS = [
 ]
 
 ALL_AVAILABLE_SCENES = [
+    "leo_brushing_teeth_custom.jpg",
+    "leo_washing_hands_custom.jpg",
+    "leo_tidying_toys_custom.jpg",
+    "leo_healthy_food_custom.jpg",
+    "leo_drinking_water_custom.jpg",
+    "leo_morning_exercise_custom.jpg",
+    "leo_bedtime_story_custom.jpg",
+    "leo_helping_family_custom.jpg",
+    "leo_arabic_alphabet_custom.jpg",
+    "leo_counting_numbers_custom.jpg",
     "scene_animal_kindness.jpg",
     "scene_letters_dal_dhal.jpg",
     "scene_art_colors.jpg",
