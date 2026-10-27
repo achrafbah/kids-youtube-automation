@@ -576,33 +576,46 @@ def get_next_unique_curriculum_topic():
     if not selected_item:
         print("🤖 Curated curriculum covered! Sourcing brand-new pedagogical topic via Gemini AI...", flush=True)
         api_key = get_gemini_api_key()
-        pillars = [
-            "الآداب والأخلاق الإسلامية والتربية الحسنة",
-            "برنامج الروض واللغة العربية وحروف الهجاء",
-            "الأرقام والحساب الممتع والرياضيات المبسطة",
-            "الأشكال والألوان والذكاء البصري للأطفال",
-            "العادات الصحية والنظام اليومي للأطفال"
+        # 80% Healthy Habits & Behavioral Milestones (proven top-performing category) | 20% Foundational Preschool Skills
+        healthy_pillars = [
+            "العادات الصحية والنظام اليومي: تنظيف الأسنان وحمايتها من التسوس",
+            "العادات الصحية والنظام اليومي: ترتيب الغرفة والألعاب والتعاون المنزلي",
+            "العادات الصحية والنظام اليومي: غسل اليدين بالماء والصابون وطرد الجراثيم",
+            "العادات الصحية والنظام اليومي: النوم المبكر والاستيقاظ بنشاط وطاقة",
+            "العادات الصحية والنظام اليومي: الغذاء الصحي، شرب الماء، وأكل الخضار والفواكه",
+            "العادات الصحية والنظام اليومي: الرياضة والنشاط البدني الصباحي"
         ]
-        chosen_pillar = pillars[len(existing_keys) % len(pillars)]
+        preschool_pillars = [
+            "الآداب والأخلاق الإسلامية: الشكر والاستئذان وبر الوالدين",
+            "برنامج الروض واللغة العربية: حروف الهجاء الممتعة مع تحدي الأبطال",
+            "الأرقام والحساب الممتع: تحدي العد والأرقام السحرية للأطفال"
+        ]
+        # Weighted selection: 4 out of 5 cycles (80%) choose Healthy Daily Habits
+        if len(existing_keys) % 5 != 0:
+            chosen_pillar = healthy_pillars[len(existing_keys) % len(healthy_pillars)]
+        else:
+            chosen_pillar = preschool_pillars[len(existing_keys) % len(preschool_pillars)]
+
         rot_idx = len(history_data.get("topics", [])) % len(ALL_AVAILABLE_SCENES)
         chosen_scene = ALL_AVAILABLE_SCENES[rot_idx]
         if chosen_scene == last_used_scene:
             chosen_scene = ALL_AVAILABLE_SCENES[(rot_idx + 1) % len(ALL_AVAILABLE_SCENES)]
 
         prompt = (
-            f"أنت خبير تربوي ومؤلف محتوى أطفال لمرحلة الروضة والتعليم المبكر (3-10 سنوات) لقناة كرتون 3D هادفة.\n"
+            f"أنت خبير تربوي ومؤلف محتوى أطفال لمرحلة الروضة والتعليم المبكر (3-10 سنوات) لقناة كرتون 3D هادفة (Tales of Wonder).\n"
             f"المحور المطلوب: {chosen_pillar}\n"
-            f"اكتب موضوع حلقة شورتس كرتونية جديدة ومبتكرة تماماً لا تشبه الحلقات السابقة.\n\n"
-            f"المعايير:\n"
-            f"1. العنوان: جذاب، مشوق للأطفال، يحتوي إيموجي، وبدون تشكيل معقد، أقل من 50 حرف.\n"
-            f"2. النص الكرتوني (Script): قصة أو حوار مرح ومشجع يلقيه الراوي للطفل، بين 40 و 65 كلمة باللغة العربية الفصحى السلسة والمحببة للأطفال.\n"
-            f"3. الدرس المستفاد (Lesson): جملة واحدة تلخص الفائدة التربوية أو الأخلاقية.\n"
-            f"4. الكلمات الدلالية: 5 وسوم متعلقة بالموضوع.\n\n"
+            f"اكتب موضوع حلقة شورتس كرتونية جديدة ومبتكرة تماماً ومحفزة للأطفال.\n\n"
+            f"المعايير الصارمة المبنية على بيانات خوارزميات يوتيوب:\n"
+            f"1. العنوان: يجب أن يبدأ بصيغة البطل أو التحدي حصراً (مثل: 'بطل الأسنان...', 'بطل الترتيب...', 'تحدي الأبطال: ...', 'سر البطل الصغير...') مع إيموجي جذاب، أقل من 45 حرف وبدون تشكيل معقد.\n"
+            f"2. خطاف أول 3 ثوانٍ (First 3-Second Hook): أول جملة في النص يجب أن تكون سؤالاً حماسياً أو نداءً يدعو الطفل للمشاركة فوراً (مثل: 'هل أنت مستعد لتحدي اليوم يا بطل؟'، 'أين تختفي الجراثيم عندما نغسل أيدينا؟') لضمان أعلى نسبة احتفاظ بالجمهور (Retention).\n"
+            f"3. النص الكرتوني (Script): قصة أو حوار مرح ومشجع يلقيه الراوي للطفل، بين 40 و 60 كلمة باللغة العربية الفصحى السلسة والمحببة للأطفال.\n"
+            f"4. الدرس المستفاد (Lesson): جملة واحدة تلخص الفائدة التربوية أو الأخلاقية.\n"
+            f"5. الكلمات الدلالية: 5 وسوم متعلقة بالموضوع.\n\n"
             f"أعد الإجابة بصيغة JSON حصراً:\n"
             f"{{\n"
             f'  "topic_key": "unique-slug-en",\n'
-            f'  "title_ar": "العنوان المشوق باللغة العربية 🌟",\n'
-            f'  "script": "النص الكرتوني الكامل هنا...",\n'
+            f'  "title_ar": "العنوان بصيغة البطل أو التحدي 🌟",\n'
+            f'  "script": "النص الكرتوني يبدأ بسؤال حماسي جذاب...",\n'
             f'  "lesson": "الدرس المستفاد هنا...",\n'
             f'  "tags": ["#shorts", "#تعليم_اطفال", "#كرتون", "#talesofwonder"]\n'
             f"}}"
@@ -732,28 +745,20 @@ def build_optimized_seo_package(topic: dict, competitor_insights: dict = None) -
     # 1. OPTIMIZED TITLE (Mobile Shorts Hook - with Competitor Intelligence)
     if competitor_insights and competitor_insights.get("suggested_title_hook"):
         suggested = competitor_insights["suggested_title_hook"].strip()
-        if len(suggested) <= 65 and "#shorts" in suggested.lower():
-            optimized_title = suggested
-            base_title = suggested.replace("#shorts", "").strip()
-        else:
-            base_title = clean_title.split("|")[0].strip()
-            optimized_title = f"{base_title[:75].rstrip()} #shorts" if "#shorts" not in base_title.lower() else base_title[:75]
+        base_title = suggested.replace("#shorts", "").strip()
     else:
         base_title = clean_title.split("|")[0].strip()
 
-        # Empirical Data Optimization: Hero framing ('بطل...') boosts CTR and retention for preschool & parenting audience
-        key_lower = topic.get("topic_key", "").lower()
-        pillar_lower = pillar.lower()
-        if not any(base_title.startswith(w) for w in ["بطل", "بَطَلُ", "سر", "سِرُّ", "كيف", "لَيْثُ"]):
-            if any(k in key_lower or k in pillar_lower for k in ["brush", "teeth", "أسنان", "اسنان", "نظافة", "غسل", "ترتيب", "نوم", "رياضة", "ماء"]):
-                base_title = f"بطل {base_title}"
+    # Empirical Data Optimization: Hero & Challenge framing ('بطل...', 'تحدي...', 'سر...') boosts CTR and retention (avg 589 views vs 3 on abstract)
+    if not any(base_title.startswith(w) for w in ["بطل", "بَطَلُ", "بَطَل", "تحدي", "تَحَدِّي", "تَحَدّي", "سر", "سِرُّ", "سِرّ", "مغامرة"]):
+        base_title = f"بطل {base_title}"
 
-        if "#shorts" not in base_title.lower():
-            if len(base_title) > 75:
-                base_title = base_title[:75].rstrip()
-            optimized_title = f"{base_title} #shorts"
-        else:
-            optimized_title = base_title[:75]
+    if "#shorts" not in base_title.lower():
+        if len(base_title) > 65:
+            base_title = base_title[:65].rstrip()
+        optimized_title = f"{base_title} #shorts"
+    else:
+        optimized_title = base_title[:75]
 
     # 2. PILLAR MAPPING & TARGETED HASHTAGS
     pillar_lower = pillar.lower()
