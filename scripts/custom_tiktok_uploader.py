@@ -137,18 +137,24 @@ def upload_to_tiktok(video_path, caption, headless=True):
         page.keyboard.press("Backspace")
         time.sleep(0.3)
         
-        # Use document.execCommand('insertText') to prevent Arabic keystroke corruption in Draft.js
+        # 1. Native synthetic paste event for Draft.js / Lexical
         page.evaluate("""(text) => {
             const el = document.querySelector("div[contenteditable='true']");
-            if (el) {
-                el.focus();
-                document.execCommand('selectAll', false, null);
-                document.execCommand('delete', false, null);
-                document.execCommand('insertText', false, text);
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+            if (!el) return;
+            el.focus();
+            const dt = new DataTransfer();
+            dt.setData('text/plain', text);
+            const evt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: dt });
+            el.dispatchEvent(evt);
         }""", caption)
         time.sleep(1)
+
+        # 2. Verify text inside editor, fallback to page.keyboard.insert_text if empty
+        val = editor.inner_text().strip()
+        if len(val) < 5:
+            editor.click(force=True)
+            page.keyboard.insert_text(caption)
+            time.sleep(1)
             
         print("✅ Caption entered!", flush=True)
         clean_overlays()
