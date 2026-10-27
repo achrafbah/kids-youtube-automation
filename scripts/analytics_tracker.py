@@ -94,17 +94,17 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     if now_utc is None:
         now_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    # 0. Enforce Daytime Waking Hours Window (08:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
+    # 0. Enforce Daytime Waking Hours Window (09:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
     morocco_time = now_utc + datetime.timedelta(hours=1)
     morocco_hour = morocco_time.hour
-    if morocco_hour < 8 or morocco_hour >= 22:
+    if morocco_hour < 9 or morocco_hour >= 22:
         reason = (
             f"🌙 Night rest active: Current time in Morocco is {morocco_time.strftime('%H:%M')} (Night). "
-            f"Kids content publishes strictly during active waking daytime hours (08:00 - 22:00 Morocco)."
+            f"Kids content publishes strictly during active waking daytime hours (09:00 - 22:00 Morocco)."
         )
         return False, reason, {
             "morocco_time": morocco_time.strftime("%H:%M"),
-            "active_window": "08:00 - 22:00 (GMT+1 Morocco)",
+            "active_window": "09:00 - 22:00 (GMT+1 Morocco)",
             "status": "night_paused"
         }
 

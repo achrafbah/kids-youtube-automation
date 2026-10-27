@@ -608,7 +608,7 @@ def get_next_unique_curriculum_topic():
             f"}}"
         )
 
-        candidate_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        candidate_models = ["gemini-2.0-flash", "gemini-1.5-flash"]
         for model_name in candidate_models:
             try:
                 client = genai.Client(api_key=api_key)
@@ -737,15 +737,23 @@ def build_optimized_seo_package(topic: dict, competitor_insights: dict = None) -
             base_title = suggested.replace("#shorts", "").strip()
         else:
             base_title = clean_title.split("|")[0].strip()
-            optimized_title = f"{base_title[:52].rstrip()} #shorts" if "#shorts" not in base_title.lower() else base_title[:65]
+            optimized_title = f"{base_title[:75].rstrip()} #shorts" if "#shorts" not in base_title.lower() else base_title[:75]
     else:
         base_title = clean_title.split("|")[0].strip()
+
+        # Empirical Data Optimization: Hero framing ('بطل...') boosts CTR and retention for preschool & parenting audience
+        key_lower = topic.get("topic_key", "").lower()
+        pillar_lower = pillar.lower()
+        if not any(base_title.startswith(w) for w in ["بطل", "بَطَلُ", "سر", "سِرُّ", "كيف", "لَيْثُ"]):
+            if any(k in key_lower or k in pillar_lower for k in ["brush", "teeth", "أسنان", "اسنان", "نظافة", "غسل", "ترتيب", "نوم", "رياضة", "ماء"]):
+                base_title = f"بطل {base_title}"
+
         if "#shorts" not in base_title.lower():
             if len(base_title) > 75:
                 base_title = base_title[:75].rstrip()
             optimized_title = f"{base_title} #shorts"
         else:
-            optimized_title = base_title[:65]
+            optimized_title = base_title[:75]
 
     # 2. PILLAR MAPPING & TARGETED HASHTAGS
     pillar_lower = pillar.lower()
