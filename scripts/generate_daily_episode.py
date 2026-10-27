@@ -960,16 +960,14 @@ def execute_daily_run():
         with open(ep_dir / "scene_prompt.txt", "w", encoding="utf-8") as pf:
             pf.write(visual_spec.get("image_prompt", ""))
 
-    # Step 2: Generate or Resolve Scene Image from script spec
-    # Curated topics carry a hand-mapped environment; it always wins for topic relevance.
-    if topic.get("scene_name"):
-        visual_spec["best_matching_scene"] = topic["scene_name"]
+    # Step 2: Generate Unique Scene Image from script spec (Strict Zero-Reuse Guard)
     if not scene_file.exists():
         art_director = ArtDirectorAgent()
         scene_file = art_director.generate_or_resolve_scene_image(
             visual_spec=visual_spec,
             output_path=scene_file,
-            last_used_scene=last_used_scene
+            last_used_scene=last_used_scene,
+            topic=topic
         )
     else:
         print(f"🖼️ Scene canvas already generated: {scene_file}", flush=True)
