@@ -64,8 +64,9 @@ def get_latest_published_video(topics_data: dict) -> Optional[dict]:
     return None
 
 def get_daily_published_count(topics_data: dict, now_utc: datetime.datetime) -> int:
-    """Count how many videos were successfully published in the current 24-hour day."""
-    today_str = now_utc.date().isoformat()
+    """Count how many videos were successfully published in the current 24-hour day (Morocco timezone)."""
+    morocco_now = now_utc + datetime.timedelta(hours=1)
+    today_str = morocco_now.date().isoformat()
     count = 0
     for entry in topics_data.get("topics", []):
         if entry.get("status") == "public_published" and entry.get("video_url"):
@@ -75,7 +76,8 @@ def get_daily_published_count(topics_data: dict, now_utc: datetime.datetime) -> 
                     dt = datetime.datetime.fromisoformat(pub_at)
                     if dt.tzinfo is None:
                         dt = dt.replace(tzinfo=datetime.timezone.utc)
-                    if dt.date() == now_utc.date():
+                    dt_morocco = dt + datetime.timedelta(hours=1)
+                    if dt_morocco.date() == morocco_now.date():
                         count += 1
                         continue
                 except Exception:
@@ -104,11 +106,13 @@ def get_live_youtube_channel_status():
         latest_pub_str = latest_item["snippet"]["publishedAt"]
         latest_pub_dt = datetime.datetime.fromisoformat(latest_pub_str.replace("Z", "+00:00"))
 
+        morocco_now = now_utc + datetime.timedelta(hours=1)
         today_uploads = 0
         for item in items:
             pub_str = item["snippet"]["publishedAt"]
             dt = datetime.datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
-            if dt.date() == now_utc.date():
+            dt_morocco = dt + datetime.timedelta(hours=1)
+            if dt_morocco.date() == morocco_now.date():
                 today_uploads += 1
 
         elapsed_hours = (now_utc - latest_pub_dt).total_seconds() / 3600.0
@@ -133,17 +137,18 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     if now_utc is None:
         now_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    # 0. Enforce Daytime Waking Hours Window (08:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
+    # 0. Enforce Active Audience Window (08:00 - 01:00 Morocco / 07:00 - 00:00 UTC)
+    # Night rest is strictly from 01:00 to 08:00 Morocco time (00:00 - 07:00 UTC)
     morocco_time = now_utc + datetime.timedelta(hours=1)
     morocco_hour = morocco_time.hour
-    if morocco_hour < 8 or morocco_hour >= 22:
+    if 1 <= morocco_hour < 8:
         reason = (
             f"🌙 Night rest active: Current time in Morocco is {morocco_time.strftime('%H:%M')} (Night). "
-            f"Kids content publishes strictly during active waking daytime hours (08:00 - 22:00 Morocco)."
+            f"Kids content publishes strictly during active audience waking hours (08:00 - 01:00 Morocco)."
         )
         return False, reason, {
             "morocco_time": morocco_time.strftime("%H:%M"),
-            "active_window": "08:00 - 22:00 (GMT+1 Morocco)",
+            "active_window": "08:00 - 01:00 (GMT+1 Morocco)",
             "status": "night_paused"
         }
 

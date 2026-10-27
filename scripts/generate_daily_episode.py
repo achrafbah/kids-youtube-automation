@@ -858,11 +858,13 @@ def check_algorithm_pacing_window(history_data, min_hours=5.0):
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     current_hour_utc = now_utc.hour
 
-    # Sleep hours in MENA region (22:00 UTC = 23:00 Morocco / 01:00 KSA to 06:00 UTC = 07:00 Morocco / 09:00 KSA)
-    if current_hour_utc >= 22 or current_hour_utc < 6:
-        print(f"🌙 [ALGORITHM GUARD] Night hours in target Arab audience (Current UTC: {now_utc.strftime('%H:%M')}).", flush=True)
-        print("   Uploading during low-traffic night hours harms the initial 2-hour velocity in the Shorts shelf.", flush=True)
-        print("   Skipping this cycle until morning preschool hours (07:00+ UTC).", flush=True)
+    # Active audience window: 08:00 - 01:00 Morocco (07:00 - 00:00 UTC)
+    # Night rest: 01:00 - 08:00 Morocco (00:00 - 07:00 UTC)
+    if 0 <= current_hour_utc < 7:
+        morocco_h = (now_utc + datetime.timedelta(hours=1)).strftime('%H:%M')
+        print(f"🌙 [ALGORITHM GUARD] Night rest in target audience (Current Morocco: {morocco_h} / UTC: {now_utc.strftime('%H:%M')}).", flush=True)
+        print("   Uploading during late-night quiet hours (01:00 - 08:00 Morocco) harms initial velocity.", flush=True)
+        print("   Skipping this cycle until active waking hours (08:00+ Morocco / 07:00+ UTC).", flush=True)
         return False
 
     topics = history_data.get("topics", [])
