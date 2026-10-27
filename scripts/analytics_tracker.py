@@ -84,6 +84,45 @@ def get_daily_published_count(topics_data: dict, now_utc: datetime.datetime) -> 
                 count += 1
     return count
 
+def get_live_youtube_channel_status():
+    """Query YouTube Data API directly to get the actual latest video uploaded and today's total upload count."""
+    try:
+        from youtube_uploader import get_authenticated_service
+        yt = get_authenticated_service()
+        if not yt:
+            return None
+        ch = yt.channels().list(mine=True, part="contentDetails").execute()
+        uploads_id = ch["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        items = yt.playlistItems().list(playlistId=uploads_id, part="snippet,contentDetails", maxResults=10).execute().get("items", [])
+        if not items:
+            return None
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        latest_item = items[0]
+        latest_vid = latest_item["contentDetails"]["videoId"]
+        latest_title = latest_item["snippet"]["title"]
+        latest_pub_str = latest_item["snippet"]["publishedAt"]
+        latest_pub_dt = datetime.datetime.fromisoformat(latest_pub_str.replace("Z", "+00:00"))
+
+        today_uploads = 0
+        for item in items:
+            pub_str = item["snippet"]["publishedAt"]
+            dt = datetime.datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
+            if dt.date() == now_utc.date():
+                today_uploads += 1
+
+        elapsed_hours = (now_utc - latest_pub_dt).total_seconds() / 3600.0
+        return {
+            "latest_video_id": latest_vid,
+            "latest_title": latest_title,
+            "latest_pub_dt": latest_pub_dt,
+            "elapsed_hours": elapsed_hours,
+            "today_uploads": today_uploads
+        }
+    except Exception as e:
+        print(f"Notice: Could not check live YouTube channel status ({e})", flush=True)
+        return None
+
 def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, force: bool = False) -> Tuple[bool, str, Dict[str, Any]]:
     """Evaluates real-time video analytics to decide if a new video should be published."""
     if force or "--force" in sys.argv or os.environ.get("FORCE_RUN") == "1":
@@ -94,27 +133,41 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
     if now_utc is None:
         now_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    # 0. Enforce Daytime Waking Hours Window (09:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
+    # 0. Enforce Daytime Waking Hours Window (08:00 - 22:00 Morocco / 07:00 - 21:00 UTC)
     morocco_time = now_utc + datetime.timedelta(hours=1)
     morocco_hour = morocco_time.hour
-    if morocco_hour < 9 or morocco_hour >= 22:
+    if morocco_hour < 8 or morocco_hour >= 22:
         reason = (
             f"🌙 Night rest active: Current time in Morocco is {morocco_time.strftime('%H:%M')} (Night). "
-            f"Kids content publishes strictly during active waking daytime hours (09:00 - 22:00 Morocco)."
+            f"Kids content publishes strictly during active waking daytime hours (08:00 - 22:00 Morocco)."
         )
         return False, reason, {
             "morocco_time": morocco_time.strftime("%H:%M"),
-            "active_window": "09:00 - 22:00 (GMT+1 Morocco)",
+            "active_window": "08:00 - 22:00 (GMT+1 Morocco)",
             "status": "night_paused"
         }
 
+    # Direct live YouTube channel sync to prevent any double-upload desync between local and cloud
+    live_status = get_live_youtube_channel_status()
+
     topics_data = load_json(TOPICS_FILE)
     today_count = get_daily_published_count(topics_data, now_utc)
+    if live_status and live_status.get("today_uploads", 0) > today_count:
+        today_count = live_status["today_uploads"]
 
     # 1. Enforce strict daily cap: Exactly 3 videos / day max
     if today_count >= MAX_DAILY_VIDEOS:
         reason = f"🛑 Daily cap reached: {today_count}/{MAX_DAILY_VIDEOS} videos already published today. System rests until tomorrow."
         return False, reason, {"daily_count": today_count, "cap": MAX_DAILY_VIDEOS}
+
+    # 2. Strict live spacing guard: Minimum 1.5h between consecutive uploads
+    if live_status and live_status.get("elapsed_hours", 99.0) < MIN_SEED_HOURS:
+        elapsed = live_status["elapsed_hours"]
+        reason = (
+            f"⏳ Minimum spacing guard active: Live video '{live_status['latest_title']}' was uploaded to YouTube "
+            f"only {elapsed:.1f}h ago ({int(elapsed * 60)} mins ago). Minimum spacing is {MIN_SEED_HOURS}h."
+        )
+        return False, reason, {"video_id": live_status["latest_video_id"], "elapsed_hours": elapsed}
 
     # 2. If no video published today yet -> Greenlight first video
     if today_count == 0:
