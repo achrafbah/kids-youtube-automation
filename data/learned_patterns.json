@@ -1,9 +1,10 @@
 {
-  "total_cycles": 3,
+  "total_cycles": 4,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
-    "Incorporate high-frequency competitor search terms in first 3 lines."
+    "Incorporate high-frequency competitor search terms in first 3 lines.",
+    "Adopt conversational question hooks and lively celebratory interjections instead of formal lecture titles to trigger higher completion rates and YouTube Shorts feed pick-up."
   ],
   "recent_insights": [
     {
@@ -63,6 +64,37 @@
           "title": "بطل الأسنان السحرية: نبتسم ببياض ناصع 🪥✨ #shorts",
           "views": 1267,
           "channel": "حكايات العجائب | Tales of Wonder"
+        }
+      ]
+    },
+    {
+      "topic_key": "healthy-eating-vegetables",
+      "timestamp": "2026-10-28T19:01:57.015988+00:00",
+      "hook_pattern": "Curiosity question hook paired with an affectionate celebratory greeting ('صحتين!') that directly engages preschool viewers and prompts parent-child interaction.",
+      "suggested_title": "صحتين! ما هو طعامك المفضل؟ 🥦🍎 #shorts",
+      "proven_keywords": [
+        "كرتون للأطفال",
+        "طعام صحي للأطفال",
+        "ما هو طعامك المفضل",
+        "الخضار والفواكه للأطفال",
+        "وجبات صحية ومفيدة",
+        "رسوم متحركة للأطفال"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "وجبات للرضع من 6 اشهر تساعد ع التسنين والمشي مفيده صحيه مشبعه وجبات باستخدام زبادي للرضيع",
+          "views": 241377,
+          "channel": "يوميات ادم مع ماما "
+        },
+        {
+          "title": "كيف يولد الطفل من بطن امه",
+          "views": 1435950,
+          "channel": "الجوكر ون"
+        },
+        {
+          "title": "ماشا والدب 👱‍♀️🐻 صحتين! 😋 ما هو الطعام الذي تفضله؟ 🍽️ كرتون للأطفال | Cartoons for kids",
+          "views": 20518777,
+          "channel": "ماشا و الدب"
         }
       ]
     }

@@ -32,7 +32,7 @@ TIKTOK_HISTORY_FILE = DATA_DIR / "tiktok_upload_history.json"
 ANALYTICS_CACHE_FILE = DATA_DIR / "video_analytics_cache.json"
 
 MAX_DAILY_VIDEOS = 3              # Exactly 3 videos / day
-MIN_SEED_HOURS = 1.5              # Minimum breathing time right after upload
+MIN_SEED_HOURS = 3.0              # Strict 3-hour minimum spacing between consecutive Shorts
 POST_STAGNATION_WAIT_MINS = 60.0  # Exactly 1 hour grace period after stagnation
 SURGE_VELOCITY_THRESHOLD = 15     # Views gained over recent window to consider surging
 
@@ -95,12 +95,21 @@ def get_live_youtube_channel_status():
             return None
         ch = yt.channels().list(mine=True, part="contentDetails").execute()
         uploads_id = ch["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
-        items = yt.playlistItems().list(playlistId=uploads_id, part="snippet,contentDetails", maxResults=10).execute().get("items", [])
+        items = yt.playlistItems().list(playlistId=uploads_id, part="snippet,contentDetails", maxResults=20).execute().get("items", [])
         if not items:
             return None
 
+        # Filter strictly for YouTube Shorts (#shorts in title or description) to separate from regular long-form videos
+        shorts_items = [
+            it for it in items
+            if "#shorts" in it["snippet"].get("title", "").lower()
+            or "#shorts" in it["snippet"].get("description", "").lower()
+        ]
+        if not shorts_items:
+            return None
+
         now_utc = datetime.datetime.now(datetime.timezone.utc)
-        latest_item = items[0]
+        latest_item = shorts_items[0]
         latest_vid = latest_item["contentDetails"]["videoId"]
         latest_title = latest_item["snippet"]["title"]
         latest_pub_str = latest_item["snippet"]["publishedAt"]
@@ -108,7 +117,7 @@ def get_live_youtube_channel_status():
 
         morocco_now = now_utc + datetime.timedelta(hours=1)
         today_uploads = 0
-        for item in items:
+        for item in shorts_items:
             pub_str = item["snippet"]["publishedAt"]
             dt = datetime.datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
             dt_morocco = dt + datetime.timedelta(hours=1)

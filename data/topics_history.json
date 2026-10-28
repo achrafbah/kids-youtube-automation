@@ -344,6 +344,20 @@
       "video_url": "https://youtu.be/vb1hJcXcuyA",
       "tiktok_published": false,
       "status": "public_published"
+    },
+    {
+      "topic_key": "healthy-eating-vegetables",
+      "date": "2026-10-28",
+      "published_at": "2026-10-28T19:02:24.742913+00:00",
+      "pillar": "العادات الصحية والنظام (Healthy Habits)",
+      "title": "طَبَقُ الصِّحَّة: الخُضَارُ وَالفَوَاكِهُ الطَّازَجَة 🥦🥕",
+      "seo_title": "بطل صحتين! ما هو طعامك المفضل؟ 🥦🍎 #shorts",
+      "lesson": "تشجيع الطفل على تناول الخضار والفواكه لنمو صحي وسليم.",
+      "scene_name": "leo_arabic_alphabet_custom.jpg",
+      "scene_description": "In a sunlit kitchen, Leo enthusiastically presents a colorful plate brimming with fresh fruits and vegetables, playfully flexing his muscle to demonstrate the superpower of healthy eating.",
+      "video_url": "https://youtu.be/UcRmLh0eiNk",
+      "tiktok_published": true,
+      "status": "public_published"
     }
   ],
   "categories_pool": [
