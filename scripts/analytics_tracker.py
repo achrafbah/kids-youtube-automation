@@ -32,7 +32,7 @@ TIKTOK_HISTORY_FILE = DATA_DIR / "tiktok_upload_history.json"
 ANALYTICS_CACHE_FILE = DATA_DIR / "video_analytics_cache.json"
 
 MAX_DAILY_VIDEOS = 3              # Exactly 3 videos / day
-MIN_SEED_HOURS = 3.0              # Strict 3-hour minimum spacing between consecutive Shorts
+MIN_SEED_HOURS = 2.0              # Minimum spacing guard (protects 3-hour schedule from cron jitter)
 POST_STAGNATION_WAIT_MINS = 60.0  # Exactly 1 hour grace period after stagnation
 SURGE_VELOCITY_THRESHOLD = 15     # Views gained over recent window to consider surging
 
@@ -278,6 +278,13 @@ def check_algorithmic_readiness(now_utc: Optional[datetime.datetime] = None, for
 
     # Views have flattened out / stagnated
     if stagnation_detected_at is None:
+        if elapsed_hours >= MIN_SEED_HOURS:
+            v_cache["stagnation_detected_at"] = now_iso
+            cache[video_id] = v_cache
+            save_json(ANALYTICS_CACHE_FILE, cache)
+            reason = f"✅ Scheduled spacing satisfied ({elapsed_hours:.1f}h elapsed >= {MIN_SEED_HOURS}h). Ready to launch episode {today_count + 1}/{MAX_DAILY_VIDEOS}!"
+            return True, reason, {"daily_count": today_count, "cap": MAX_DAILY_VIDEOS, "video_id": video_id}
+
         # First time detecting stagnation! Start the strict 1-hour grace timer
         v_cache["stagnation_detected_at"] = now_iso
         cache[video_id] = v_cache

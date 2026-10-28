@@ -1,9 +1,12 @@
-name: Kids Episode Automation (Tales of Wonder - Hourly Schedule Engine)
+name: Kids Episode Automation (Tales of Wonder - 3 Daily Shorts: 16:30, 19:30, 22:30)
 
 on:
   schedule:
-    # Runs hourly to evaluate platform-specific peak engagement windows
-    - cron: '0 * * * *'
+    # 3 Daily Shorts at fixed Morocco times (GMT+1):
+    # - 16:30 Morocco -> 15:30 UTC
+    # - 19:30 Morocco -> 18:30 UTC
+    # - 22:30 Morocco -> 21:30 UTC
+    - cron: '30 15,18,21 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions web interface
 
 permissions:
@@ -55,7 +58,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/topics_history.json data/tiktok_upload_history.json data/video_analytics_cache.json
+          git add data/topics_history.json data/tiktok_upload_history.json data/video_analytics_cache.json data/learned_patterns.json
           git diff --staged --quiet || (git commit -m "chore(history): auto-record daily topic, tiktok & analytics cache [skip ci]" && git push)
 
       - name: 📤 Upload Generated Video Artifact (Backup)
