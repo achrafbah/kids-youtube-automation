@@ -917,20 +917,7 @@ def check_algorithm_pacing_window(history_data, min_hours=5.0):
 
     return True
 
-def execute_daily_run():
-    from platform_scheduler import check_youtube_pacing, check_tiktok_pacing
-
-    yt_ready, yt_reason = check_youtube_pacing()
-    tt_ready, tt_reason = check_tiktok_pacing()
-
-    print(f"📊 [SCHEDULER STATUS]", flush=True)
-    print(f"   YouTube Shorts: {'✅ READY' if yt_ready else '⏳ PAUSED'} ({yt_reason})", flush=True)
-    print(f"   TikTok:         {'✅ READY' if tt_ready else '⏳ PAUSED'} ({tt_reason})", flush=True)
-
-    if not yt_ready and not tt_ready:
-        print("✅ Both platforms gracefully paused. Peak audience windows & channel momentum protected.", flush=True)
-        sys.exit(0)
-
+def generate_single_episode(yt_ready=True, yt_reason="", tt_ready=False, tt_reason="", is_draft=False):
     topic, history_data = get_next_unique_curriculum_topic()
     today_str = datetime.date.today().isoformat()
     ep_dir = OUTPUT_DIR / f"{today_str}_{topic['topic_key']}"
@@ -948,7 +935,7 @@ def execute_daily_run():
                 last_used_scene = t["scene_name"]
                 break
 
-    # Step 1: Script Analysis & Visual/Animation Design (Intila9an men script -> image & animation)
+    # Step 1: Script Analysis & Visual/Animation Design
     prompt_json = ep_dir / "scene_prompt.json"
     if prompt_json.exists():
         visual_spec = load_json(prompt_json)
@@ -964,7 +951,6 @@ def execute_daily_run():
         print(f"🎬 Visual Description: {visual_spec.get('scene_description')}", flush=True)
         print(f"🎨 Theme: {visual_spec.get('theme_palette')} | Particles: {visual_spec.get('particle1')} {visual_spec.get('particle2')} | Cam Profile: #{visual_spec.get('camera_style')}", flush=True)
 
-        # Save visual prompt and specification for full transparency & tracking
         with open(ep_dir / "scene_prompt.json", "w", encoding="utf-8") as pf:
             json.dump(visual_spec, pf, ensure_ascii=False, indent=2)
         with open(ep_dir / "scene_prompt.txt", "w", encoding="utf-8") as pf:
@@ -1020,8 +1006,10 @@ def execute_daily_run():
     description = seo_package["description"]
     tags = seo_package["tags"]
 
+    privacy_status = "private" if is_draft else os.environ.get("YOUTUBE_PRIVACY_STATUS", "public")
+
     if yt_ready:
-        print(f"🎯 [YOUTUBE] In peak window: Uploading to YouTube as Public...", flush=True)
+        print(f"🎯 [YOUTUBE] Uploading to YouTube as {privacy_status.upper()} (Draft Mode: {is_draft})...", flush=True)
         print(f"🎯 SEO Optimized Title: {title}", flush=True)
         print(f"🏷️ SEO Tags ({len(tags)} tags): {tags[:6]}...", flush=True)
         print(f"📝 Hashtags: {seo_package['hashtags']}", flush=True)
@@ -1031,19 +1019,19 @@ def execute_daily_run():
             title=title,
             description=description,
             tags=tags,
-            privacy_status=os.environ.get("YOUTUBE_PRIVACY_STATUS", "public"),  # Set YOUTUBE_PRIVACY_STATUS=private for draft
+            privacy_status=privacy_status,
             made_for_kids=False,
             thumbnail_path=str(scene_file)
         )
     else:
         print(f"⏳ [YOUTUBE] Skipping YouTube upload right now: {yt_reason}", flush=True)
 
-    # Step 5b: Multi-Platform Upload to TikTok (if TikTok is in its window)
+    # Step 5b: Multi-Platform Upload to TikTok (only when public)
     tiktok_published = False
-    if tt_ready and os.environ.get("YOUTUBE_PRIVACY_STATUS", "public") != "private":
+    if tt_ready and not is_draft:
         try:
             from custom_tiktok_uploader import upload_episode_to_tiktok
-            print("📱 [TIKTOK] In peak window: Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
+            print("📱 [TIKTOK] Publishing daily short episode to TikTok with viral algorithm captions...", flush=True)
             tiktok_published = upload_episode_to_tiktok(
                 video_path=video_path,
                 title=topic["title_ar"],
@@ -1058,10 +1046,14 @@ def execute_daily_run():
         except Exception as tiktok_err:
             print(f"⚠️ [TIKTOK] TikTok upload notice: {tiktok_err}", flush=True)
     else:
-        print(f"⏳ [TIKTOK] Skipping TikTok upload right now: {tt_reason}", flush=True)
+        print(f"⏳ [TIKTOK] Skipping TikTok upload right now: {tt_reason or 'Draft mode'}", flush=True)
 
     # Step 6: Record history to prevent duplicates
-    status_str = "public_published" if (upload_result and upload_result.get("video_url")) else (upload_result.get("status", "upload_pending") if upload_result else "upload_pending")
+    if upload_result and upload_result.get("video_url"):
+        status_str = "draft_saved" if is_draft else "public_published"
+    else:
+        status_str = upload_result.get("status", "upload_pending") if upload_result else "upload_pending"
+
     new_entry = {
         "topic_key": topic["topic_key"],
         "date": today_str,
@@ -1074,21 +1066,65 @@ def execute_daily_run():
         "scene_description": visual_spec.get("scene_description", ""),
         "video_url": upload_result.get("video_url") if upload_result else None,
         "tiktok_published": tiktok_published,
-        "status": status_str
+        "status": status_str,
+        "privacy": privacy_status
     }
     history_data.setdefault("topics", []).append(new_entry)
     save_json(TOPICS_FILE, history_data)
 
     print("\n" + "=" * 50)
-    print("🎉 DAILY RUN FINISHED!")
+    print("🎉 EPISODE RUN FINISHED!")
     print(f"Pillar: {topic['pillar']}")
     print(f"Title: {topic['title_ar']}")
     if upload_result and upload_result.get("video_url"):
-        print(f"Public URL: {upload_result['video_url']}")
+        print(f"Video URL ({privacy_status}): {upload_result['video_url']}")
     else:
         print(f"Status: {status_str} (Local video saved: {video_path})")
     print("=" * 50)
     return new_entry
+
+def execute_daily_run():
+    from platform_scheduler import check_youtube_pacing, check_tiktok_pacing
+
+    privacy_status = os.environ.get("YOUTUBE_PRIVACY_STATUS", "public").lower()
+    is_draft = (privacy_status == "private")
+    force_run = (os.environ.get("FORCE_RUN", "false").lower() in ("true", "1", "yes"))
+    target_count = int(os.environ.get("GENERATE_COUNT", "1"))
+
+    if is_draft or force_run:
+        yt_ready = True
+        yt_reason = "Manual / Draft Run (Bypassing audience pacing)"
+        tt_ready = False
+        tt_reason = "Draft mode - TikTok skipped"
+    else:
+        yt_ready, yt_reason = check_youtube_pacing()
+        tt_ready, tt_reason = check_tiktok_pacing()
+
+    print(f"📊 [SCHEDULER STATUS]", flush=True)
+    print(f"   Mode:           {'🔒 DRAFT (PRIVATE)' if is_draft else '🌐 PUBLIC'}")
+    print(f"   Target Count:   {target_count} video(s)")
+    print(f"   YouTube Shorts: {'✅ READY' if yt_ready else '⏳ PAUSED'} ({yt_reason})", flush=True)
+    print(f"   TikTok:         {'✅ READY' if tt_ready else '⏳ PAUSED'} ({tt_reason})", flush=True)
+
+    if not yt_ready and not tt_ready:
+        print("✅ Both platforms gracefully paused. Peak audience windows & channel momentum protected.", flush=True)
+        sys.exit(0)
+
+    results = []
+    for idx in range(target_count):
+        print(f"\n==========================================")
+        print(f"🎬 PROCESSING EPISODE {idx + 1} OF {target_count}")
+        print(f"==========================================\n", flush=True)
+        entry = generate_single_episode(
+            yt_ready=yt_ready,
+            yt_reason=yt_reason,
+            tt_ready=(tt_ready if idx == 0 else False),
+            tt_reason=tt_reason,
+            is_draft=is_draft
+        )
+        results.append(entry)
+
+    return results
 
 def retry_pending_uploads():
     history_data = load_json(TOPICS_FILE)

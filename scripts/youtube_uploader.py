@@ -68,6 +68,12 @@ def get_authenticated_service():
                 creds = None
 
         if not refreshed:
+            is_ci = os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true'
+            if is_ci:
+                print('❌ Headless CI/CD environment detected: Cannot open interactive browser for YouTube authorization.')
+                print('   Please update the YOUTUBE_TOKEN_JSON secret in GitHub repository settings.')
+                return None
+
             if not CLIENT_SECRET_FILE.exists():
                 print("=" * 60)
                 print("❌ Fichier `client_secret.json` introuvable !")
