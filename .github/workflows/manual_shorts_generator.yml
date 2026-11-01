@@ -20,7 +20,25 @@ on:
         type: choice
         options:
           - private
+          - scheduled
           - public
+      pillar:
+        description: 'المحور التربوي (Pillar - اختياري)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'العادات الصحية والنظام (Healthy Habits)'
+          - 'الآداب والأخلاق والتربية (Manners & Values)'
+          - 'الأرقام والحساب الممتع (Numbers & Math)'
+          - 'برنامج الروض واللغة العربية (Preschool Arabic)'
+          - 'الأشكال والألوان (Shapes & Colors)'
+      custom_topic:
+        description: 'موضوع مخصص ترغب في توليده (Custom Topic - اختياري)'
+        required: false
+        default: ''
+        type: string
       force:
         description: 'تجاوز فترات الانتظار وجدول النشر (Force bypass spacing guard)'
         required: true
@@ -70,6 +88,8 @@ jobs:
           TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
           YOUTUBE_PRIVACY_STATUS: ${{ github.event.inputs.privacy_status }}
           GENERATE_COUNT: ${{ github.event.inputs.count }}
+          CHOSEN_PILLAR: ${{ github.event.inputs.pillar }}
+          CUSTOM_TOPIC_INPUT: ${{ github.event.inputs.custom_topic }}
           FORCE_RUN: ${{ github.event.inputs.force }}
           PYTHONUNBUFFERED: "1"
         run: |

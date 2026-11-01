@@ -563,8 +563,10 @@ ALL_AVAILABLE_SCENES = [
     "manners_classroom.jpg"
 ]
 
-def get_next_unique_curriculum_topic():
-    """Retrieve next uncompleted curriculum topic with strict zero-repetition visual diversity guard."""
+def get_next_unique_curriculum_topic(custom_topic=None, chosen_pillar=None):
+    """Retrieve next uncompleted curriculum topic with strict zero-repetition visual diversity guard.
+    Supports on-demand custom topics and pillar overrides.
+    """
     history_data = load_json(TOPICS_FILE)
     existing_keys = {t.get("topic_key", t.get("title", "")).lower() for t in history_data.get("topics", [])}
 
@@ -576,6 +578,64 @@ def get_next_unique_curriculum_topic():
                 last_used_scene = t["scene_name"]
                 break
 
+    rot_idx = len(history_data.get("topics", [])) % len(ALL_AVAILABLE_SCENES)
+    default_scene = ALL_AVAILABLE_SCENES[rot_idx]
+    if default_scene == last_used_scene:
+        default_scene = ALL_AVAILABLE_SCENES[(rot_idx + 1) % len(ALL_AVAILABLE_SCENES)]
+
+    # Case A: User supplied a custom topic via manual trigger
+    custom_input = (custom_topic or os.environ.get("CUSTOM_TOPIC_INPUT", "")).strip()
+    if custom_input:
+        print(f"🎯 [CUSTOM TOPIC] Generating on-demand script for: '{custom_input}'...", flush=True)
+        api_key = get_gemini_api_key()
+        prompt = (
+            "أنت مؤلف محتوى كرتوني 3D وخبير في خوارزميات YouTube Shorts للأطفال (Tales of Wonder).\n"
+            f"الموضوع المطلوب خصيصاً: {custom_input}\n"
+            "المعايير الصارمة لضمان أعلى نسبة احتفاظ بالجمهور (Viewer Retention):\n"
+            "1. العنوان (title_ar): يبدأ بـ 'بطل...' أو 'تحدي...' مع إيموجي مشجع، أقل من 50 حرفاً وبدون تشكيل معقد.\n"
+            "2. خطاف أول 3 ثوانٍ (Golden Hook): أول جملة في النص يجب أن تكون سؤالاً حماسياً يدعو الطفل للمشاركة فوراً.\n"
+            "3. النص الكرتوني (script): نص شيق، دافئ ومحفز للطفل بين 40 و 55 كلمة باللغة العربية الفصحى المبسطة.\n"
+            "4. الدرس المستفاد (lesson): تلخيص أخلاقي أو تربوي في جملة واحدة واضحة.\n"
+            "5. الكلمات المفتاحية (tags): 5 وسوم هادفة.\n\n"
+            "أعد النتيجة بصيغة JSON حصراً:\n"
+            "{\n"
+            '  "title_ar": "العنوان 🌟",\n'
+            '  "script": "النص يبدأ بسؤال حماسي...",\n'
+            '  "lesson": "الدرس المستفاد...",\n'
+            '  "tags": ["#shorts", "#أطفال", "#كرتون", "#talesofwonder"]\n'
+            "}"
+        )
+        try:
+            client = genai.Client(api_key=api_key)
+            resp = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt,
+                config={"response_mime_type": "application/json"}
+            )
+            if resp and resp.text:
+                res_data = json.loads(resp.text)
+                slug = re.sub(r'[^a-zA-Z0-9]+', '-', custom_input.lower()).strip('-')[:30] or f"custom-{int(datetime.datetime.now().timestamp())}"
+                return {
+                    "topic_key": f"custom-{slug}-{int(datetime.datetime.now().timestamp()) % 10000}",
+                    "pillar": chosen_pillar or "موضوع مخصص (Custom Topic)",
+                    "scene_name": default_scene,
+                    "title_ar": res_data.get("title_ar", custom_input),
+                    "script": res_data.get("script", custom_input),
+                    "lesson": res_data.get("lesson", "التعلم المستمر واكتشاف العالم يمنحان أبطالنا القوة والذكاء."),
+                    "tags": res_data.get("tags", ["#shorts", "#أطفال", "#talesofwonder"])
+                }, history_data
+        except Exception as custom_err:
+            print(f"Notice on custom topic generation: {custom_err}", flush=True)
+
+    # Case B: User specified a particular curriculum pillar
+    target_pillar = (chosen_pillar or os.environ.get("CHOSEN_PILLAR", "auto")).strip()
+    if target_pillar and target_pillar.lower() != "auto":
+        print(f"🎯 [PILLAR FILTER] Searching topics in pillar: '{target_pillar}'...", flush=True)
+        for item in CURRICULUM_TOPICS:
+            if target_pillar.lower() in item.get("pillar", "").lower() and item["topic_key"].lower() not in existing_keys:
+                return dict(item), history_data
+
+    # Case C: Standard Curated Curriculum Picker
     selected_item = None
     for item in CURRICULUM_TOPICS:
         if item["topic_key"].lower() not in existing_keys:
@@ -586,7 +646,6 @@ def get_next_unique_curriculum_topic():
     if not selected_item:
         print("🤖 Curated curriculum covered! Sourcing brand-new pedagogical topic via Gemini AI...", flush=True)
         api_key = get_gemini_api_key()
-        # 80% Healthy Habits & Behavioral Milestones (proven top-performing category) | 20% Foundational Preschool Skills
         healthy_pillars = [
             "العادات الصحية والنظام اليومي: تنظيف الأسنان وحمايتها من التسوس",
             "العادات الصحية والنظام اليومي: ترتيب الغرفة والألعاب والتعاون المنزلي",
@@ -600,35 +659,31 @@ def get_next_unique_curriculum_topic():
             "برنامج الروض واللغة العربية: حروف الهجاء الممتعة مع تحدي الأبطال",
             "الأرقام والحساب الممتع: تحدي العد والأرقام السحرية للأطفال"
         ]
-        # Weighted selection: 4 out of 5 cycles (80%) choose Healthy Daily Habits
         if len(existing_keys) % 5 != 0:
-            chosen_pillar = healthy_pillars[len(existing_keys) % len(healthy_pillars)]
+            chosen_pillar_val = healthy_pillars[len(existing_keys) % len(healthy_pillars)]
         else:
-            chosen_pillar = preschool_pillars[len(existing_keys) % len(preschool_pillars)]
+            chosen_pillar_val = preschool_pillars[len(existing_keys) % len(preschool_pillars)]
 
-        rot_idx = len(history_data.get("topics", [])) % len(ALL_AVAILABLE_SCENES)
-        chosen_scene = ALL_AVAILABLE_SCENES[rot_idx]
-        if chosen_scene == last_used_scene:
-            chosen_scene = ALL_AVAILABLE_SCENES[(rot_idx + 1) % len(ALL_AVAILABLE_SCENES)]
+        chosen_scene = default_scene
 
         prompt = (
-            f"أنت خبير تربوي ومؤلف محتوى أطفال لمرحلة الروضة والتعليم المبكر (3-10 سنوات) لقناة كرتون 3D هادفة (Tales of Wonder).\n"
-            f"المحور المطلوب: {chosen_pillar}\n"
-            f"اكتب موضوع حلقة شورتس كرتونية جديدة ومبتكرة تماماً ومحفزة للأطفال.\n\n"
-            f"المعايير الصارمة المبنية على بيانات خوارزميات يوتيوب:\n"
-            f"1. العنوان: يجب أن يبدأ بصيغة البطل أو التحدي حصراً (مثل: 'بطل الأسنان...', 'بطل الترتيب...', 'تحدي الأبطال: ...', 'سر البطل الصغير...') مع إيموجي جذاب، أقل من 45 حرف وبدون تشكيل معقد.\n"
-            f"2. خطاف أول 3 ثوانٍ (First 3-Second Hook): أول جملة في النص يجب أن تكون سؤالاً حماسياً أو نداءً يدعو الطفل للمشاركة فوراً (مثل: 'هل أنت مستعد لتحدي اليوم يا بطل؟'، 'أين تختفي الجراثيم عندما نغسل أيدينا؟') لضمان أعلى نسبة احتفاظ بالجمهور (Retention).\n"
-            f"3. النص الكرتوني (Script): قصة أو حوار مرح ومشجع يلقيه الراوي للطفل، بين 40 و 60 كلمة باللغة العربية الفصحى السلسة والمحببة للأطفال.\n"
-            f"4. الدرس المستفاد (Lesson): جملة واحدة تلخص الفائدة التربوية أو الأخلاقية.\n"
-            f"5. الكلمات الدلالية: 5 وسوم متعلقة بالموضوع.\n\n"
-            f"أعد الإجابة بصيغة JSON حصراً:\n"
-            f"{{\n"
-            f'  "topic_key": "unique-slug-en",\n'
-            f'  "title_ar": "العنوان بصيغة البطل أو التحدي 🌟",\n'
-            f'  "script": "النص الكرتوني يبدأ بسؤال حماسي جذاب...",\n'
-            f'  "lesson": "الدرس المستفاد هنا...",\n'
-            f'  "tags": ["#shorts", "#تعليم_اطفال", "#كرتون", "#talesofwonder"]\n'
-            f"}}"
+            "أنت خبير تربوي ومؤلف محتوى أطفال لمرحلة الروضة والتعليم المبكر (3-10 سنوات) لقناة كرتون 3D هادفة (Tales of Wonder).\n"
+            f"المحور المطلوب: {chosen_pillar_val}\n"
+            "اكتب موضوع حلقة شورتس كرتونية جديدة ومبتكرة تماماً ومحفزة للأطفال.\n\n"
+            "المعايير الصارمة المبنية على خوارزميات YouTube Shorts لعام 2026:\n"
+            "1. العنوان: يبدأ بصيغة البطل أو التحدي حصراً ('بطل...', 'تحدي...', 'سر...') مع إيموجي جذاب، أقل من 45 حرف وبدون تشكيل معقد.\n"
+            "2. خطاف أول 3 ثوانٍ (First 3-Second Hook): أول جملة في النص يجب أن تكون سؤالاً حماسياً أو نداءً يدعو الطفل للمشاركة فوراً (مثل: 'هل أنت مستعد لتحدي اليوم يا بطل؟') لضمان أعلى نسبة احتفاظ بالجمهور (Retention).\n"
+            "3. النص الكرتوني (Script): قصة أو حوار مرح ومشجع بين 40 و 55 كلمة باللغة العربية الفصحى السلسة.\n"
+            "4. الدرس المستفاد (Lesson): جملة واحدة تلخص الفائدة التربوية أو الأخلاقية.\n"
+            "5. الكلمات الدلالية: 5 وسوم متعلقة بالموضوع.\n\n"
+            "أعد الإجابة بصيغة JSON حصراً:\n"
+            "{\n"
+            '  "topic_key": "unique-slug-en",\n'
+            '  "title_ar": "العنوان بصيغة البطل أو التحدي 🌟",\n'
+            '  "script": "النص الكرتوني يبدأ بسؤال حماسي جذاب...",\n'
+            '  "lesson": "الدرس المستفاد هنا...",\n'
+            '  "tags": ["#shorts", "#تعليم_اطفال", "#كرتون", "#talesofwonder"]\n'
+            "}"
         )
 
         candidate_models = ["gemini-2.0-flash", "gemini-1.5-flash"]
@@ -646,7 +701,7 @@ def get_next_unique_curriculum_topic():
                         slug = data.get("topic_key", f"ai-topic-{int(datetime.datetime.now().timestamp())}")
                         selected_item = {
                             "topic_key": slug,
-                            "pillar": chosen_pillar,
+                            "pillar": chosen_pillar_val,
                             "scene_name": chosen_scene,
                             "title_ar": data["title_ar"],
                             "script": data["script"],
@@ -657,7 +712,6 @@ def get_next_unique_curriculum_topic():
             except Exception as e:
                 print(f"Gemini topic generation warning ({model_name}): {e}", flush=True)
 
-        # Dynamic fail-safe curated cycle if offline/quota
         if not selected_item:
             cycle_idx = len(existing_keys) % len(CURRICULUM_TOPICS)
             base_item = dict(CURRICULUM_TOPICS[cycle_idx])
@@ -666,7 +720,6 @@ def get_next_unique_curriculum_topic():
             base_item["scene_name"] = chosen_scene
             selected_item = base_item
 
-    # Strict Diversity Guard: if selected scene equals the previous video's scene, swap to alternate
     if last_used_scene and selected_item.get("scene_name") == last_used_scene:
         current_idx = ALL_AVAILABLE_SCENES.index(last_used_scene) if last_used_scene in ALL_AVAILABLE_SCENES else 0
         selected_item["scene_name"] = ALL_AVAILABLE_SCENES[(current_idx + 1) % len(ALL_AVAILABLE_SCENES)]
