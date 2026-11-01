@@ -1,14 +1,10 @@
 """Interactive OAuth Authorization Helper for YouTube API.
-Opens default browser with matching OAuth state and listens on local server to capture token.
 """
 
-import os
 import sys
-import json
-import secrets
 from pathlib import Path
 
-# Fix Windows console encoding for characters & emojis
+# Fix Windows console encoding
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -29,38 +25,35 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube"
 ]
 
+class PromptMessage(str):
+    def format(self, *args, **kwargs):
+        url = kwargs.get("url", "")
+        if url:
+            with open(AUTH_URL_FILE, "w", encoding="utf-8") as f:
+                f.write(url)
+        msg = (
+            "\n" + "=" * 60 + "\n"
+            f"YOUTUBE OAUTH AUTHORIZATION URL:\n{url}\n"
+            + "=" * 60 + "\n\nWaiting for authorization on http://localhost:8080/ ...\n"
+        )
+        print(msg, flush=True)
+        return msg
+
 def main():
-    print("Initializing OAuth Flow...", flush=True)
+    print("Initializing Clean OAuth Flow...", flush=True)
     flow = InstalledAppFlow.from_client_secrets_file(
         str(CLIENT_SECRET_FILE),
-        scopes=SCOPES,
-        redirect_uri="http://localhost:8080/"
+        scopes=SCOPES
     )
 
-    state = secrets.token_urlsafe(32)
-    auth_url, _ = flow.authorization_url(
-        prompt="consent",
-        access_type="offline",
-        state=state
-    )
-
-    with open(AUTH_URL_FILE, "w", encoding="utf-8") as f:
-        f.write(auth_url)
-
-    print("\n" + "=" * 60)
-    print("YOUTUBE OAUTH AUTHORIZATION URL:")
-    print(auth_url)
-    print("=" * 60 + "\n", flush=True)
-
-    print("Waiting for authorization on http://localhost:8080/ ...", flush=True)
     try:
         creds = flow.run_local_server(
             port=8080,
             open_browser=True,
             prompt="consent",
             access_type="offline",
-            state=state,
-            timeout_seconds=300
+            timeout_seconds=1800,
+            authorization_prompt_message=PromptMessage("Please visit: {url}")
         )
         with open(TOKEN_FILE, "w", encoding="utf-8") as token_f:
             token_f.write(creds.to_json())

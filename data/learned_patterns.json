@@ -1,10 +1,11 @@
 {
-  "total_cycles": 4,
+  "total_cycles": 5,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
     "Incorporate high-frequency competitor search terms in first 3 lines.",
-    "Adopt conversational question hooks and lively celebratory interjections instead of formal lecture titles to trigger higher completion rates and YouTube Shorts feed pick-up."
+    "Adopt conversational question hooks and lively celebratory interjections instead of formal lecture titles to trigger higher completion rates and YouTube Shorts feed pick-up.",
+    "Remove heavy diacritics and truncated poetic phrasing from titles, replacing them with high-volume behavioral triggers ('وقت النوم', 'قصص قبل النوم') to align with parent search queries."
   ],
   "recent_insights": [
     {
@@ -95,6 +96,37 @@
           "title": "ماشا والدب 👱‍♀️🐻 صحتين! 😋 ما هو الطعام الذي تفضله؟ 🍽️ كرتون للأطفال | Cartoons for kids",
           "views": 20518777,
           "channel": "ماشا و الدب"
+        }
+      ]
+    },
+    {
+      "topic_key": "early-sleep-energy",
+      "timestamp": "2026-11-01T10:10:13.865590+00:00",
+      "hook_pattern": "Routine trigger + aspirational reward ('وقت النوم' with 'بطل النشاط') designed to capture parent bedtime search intent and toddler motivation.",
+      "suggested_title": "حان وقت النوم: سر بطل النشاط! 🌙⭐ #shorts",
+      "proven_keywords": [
+        "قصص قبل النوم للأطفال",
+        "العادات الصحية للأطفال",
+        "حكايات قبل النوم",
+        "أغنية النشاط للأطفال",
+        "النوم المبكر للاطفال",
+        "قصص اطفال هادفة"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "صار الصبح وقت الافطار  🍊🍓🍏 | أغنية النشاط و العادات الصحية  #أغاني_الأطفال #الفواكه #shorts",
+          "views": 506099,
+          "channel": "Fruity Tv"
+        },
+        {
+          "title": "أغنية الطابور | أغنية انتقال بين الأنشطة | أغنية تعليمية للأطفال | Arabic Classroom Transition Song",
+          "views": 69505,
+          "channel": "arabicwithdina"
+        },
+        {
+          "title": "قصص اطفال - قصص قبل النوم - قصص شجرة الأحلام - قصة الفيل الطيوب",
+          "views": 4039613,
+          "channel": "زاد الحروف - نحسب"
         }
       ]
     }

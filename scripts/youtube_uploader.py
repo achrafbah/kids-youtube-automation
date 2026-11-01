@@ -86,23 +86,14 @@ def get_authenticated_service():
             try:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     str(CLIENT_SECRET_FILE),
-                    scopes=SCOPES,
-                    redirect_uri="http://localhost:8080/"
+                    scopes=SCOPES
                 )
-                auth_url, _ = flow.authorization_url(
-                    prompt="consent",
-                    access_type="offline"
-                )
-                auth_url_file = CREDENTIALS_DIR / "auth_url.txt"
-                with open(auth_url_file, "w", encoding="utf-8") as f:
-                    f.write(auth_url)
-                print(f"Auth URL: {auth_url}", flush=True)
                 creds = flow.run_local_server(
                     port=8080,
                     open_browser=True,
                     access_type="offline",
                     prompt="consent",
-                    timeout_seconds=300
+                    timeout_seconds=1800
                 )
             except Exception as auth_err:
                 print(f"⚠️ YouTube authorization could not complete: {auth_err}")
