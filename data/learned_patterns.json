@@ -1,5 +1,5 @@
 {
-  "total_cycles": 9,
+  "total_cycles": 10,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
@@ -243,6 +243,34 @@
           "title": "Omar & Hana Arabic | أناشيد و رسوم إسلامية | احترام الكبار",
           "views": 1418897,
           "channel": "Omar & Hana Arabic - أناشيد و رسوم دينية للأطفال"
+        }
+      ]
+    },
+    {
+      "topic_key": "kindness-to-animals-cycle-2",
+      "timestamp": "2026-11-01T22:33:52.742924+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "الرِّفْقُ بِالحَيَوَان: صَدِيقُنَا الأَلِيف 🐱🐦 #shorts",
+      "proven_keywords": [
+        "الرفق بالحيوان للاطفال _ الروضه الافتراضيه _ وحدة حيواناتي المفضله",
+        "الرفق بالحيوان",
+        "تعليم الأطفال آداب معاملة الحيوانات في الإسلام 🐶🐱 | سنن الرسول محمد ﷺ | تعلموا مع سفروت ."
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "الرفق بالحيوان للاطفال _ الروضه الافتراضيه _ وحدة حيواناتي المفضله",
+          "views": 100363,
+          "channel": "K, "
+        },
+        {
+          "title": "الرفق بالحيوان",
+          "views": 5381,
+          "channel": "Cool Toon"
+        },
+        {
+          "title": "تعليم الأطفال آداب معاملة الحيوانات في الإسلام 🐶🐱 | سنن الرسول محمد ﷺ | تعلموا مع سفروت .",
+          "views": 1440,
+          "channel": "كوكب المرح FUN PLANET"
         }
       ]
     }
