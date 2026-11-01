@@ -1,11 +1,12 @@
 {
-  "total_cycles": 5,
+  "total_cycles": 6,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
     "Incorporate high-frequency competitor search terms in first 3 lines.",
     "Adopt conversational question hooks and lively celebratory interjections instead of formal lecture titles to trigger higher completion rates and YouTube Shorts feed pick-up.",
-    "Remove heavy diacritics and truncated poetic phrasing from titles, replacing them with high-volume behavioral triggers ('وقت النوم', 'قصص قبل النوم') to align with parent search queries."
+    "Remove heavy diacritics and truncated poetic phrasing from titles, replacing them with high-volume behavioral triggers ('وقت النوم', 'قصص قبل النوم') to align with parent search queries.",
+    "Anchoring health habits around 'بطل' (Hero) and 'سر' (Secret) produces significantly higher algorithmic reach than passive educational naming."
   ],
   "recent_insights": [
     {
@@ -127,6 +128,37 @@
           "title": "قصص اطفال - قصص قبل النوم - قصص شجرة الأحلام - قصة الفيل الطيوب",
           "views": 4039613,
           "channel": "زاد الحروف - نحسب"
+        }
+      ]
+    },
+    {
+      "topic_key": "drinking-water-vitality",
+      "timestamp": "2026-11-01T13:58:50.382591+00:00",
+      "hook_pattern": "Hero-identity curiosity paired with an energetic action imperative ('سر طاقة البطل + اشرب ماء') strongly triggers preschool click-through.",
+      "suggested_title": "سر طاقة البطل: اشرب ماء وانتعش! 💧 #shorts",
+      "proven_keywords": [
+        "شرب الماء للأطفال",
+        "سر طاقة ونشاط",
+        "أغنية شرب الماء",
+        "فوائد الماء للأطفال",
+        "عادات صحية للأطفال",
+        "قطرة ماء تساوي حياة"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "قطرة ماء تساوي حياة! 💧🐦 | أغنية شرب الماء للأطفال (طاقة ونشاط)",
+          "views": 196,
+          "channel": "Joyful Kids"
+        },
+        {
+          "title": "قطرة ماء تساوي حياة! 💧🐦 | أغنية شرب الماء للأطفال (طاقة ونشاط)",
+          "views": 10,
+          "channel": "Joyful Kids"
+        },
+        {
+          "title": "يمني يحول الماء ثلج بثواني مسحيل يكون طبيعي😳🤯",
+          "views": 1405137,
+          "channel": "NHAAB - نهاب تيوب"
         }
       ]
     }
