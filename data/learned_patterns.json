@@ -1,5 +1,5 @@
 {
-  "total_cycles": 10,
+  "total_cycles": 11,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
@@ -271,6 +271,34 @@
           "title": "تعليم الأطفال آداب معاملة الحيوانات في الإسلام 🐶🐱 | سنن الرسول محمد ﷺ | تعلموا مع سفروت .",
           "views": 1440,
           "channel": "كوكب المرح FUN PLANET"
+        }
+      ]
+    },
+    {
+      "topic_key": "patience-and-calm-cycle-2",
+      "timestamp": "2026-11-01T22:43:03.012177+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "الصَّبْرُ الجَمِيلُ وَالتَّحَكُّمُ فِي الغَضَب 🧘 #shorts",
+      "proven_keywords": [
+        "التحكم في الغضب || المسلم الصغير 🤍",
+        "🔨 الصبي والمسامير: درس مذهل عن التحكم في الغضب!",
+        "الغضب #كرتون  #cartoon #قصص #love #lovestatus #angry #allah #emotional"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "التحكم في الغضب || المسلم الصغير 🤍",
+          "views": 3160,
+          "channel": "Little Muslim | المسلم الصغير"
+        },
+        {
+          "title": "🔨 الصبي والمسامير: درس مذهل عن التحكم في الغضب!",
+          "views": 2433,
+          "channel": "WhimsyWoven"
+        },
+        {
+          "title": "الغضب #كرتون  #cartoon #قصص #love #lovestatus #angry #allah #emotional",
+          "views": 358,
+          "channel": "Sadek Essam"
         }
       ]
     }
