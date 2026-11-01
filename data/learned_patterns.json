@@ -1,5 +1,5 @@
 {
-  "total_cycles": 6,
+  "total_cycles": 9,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
@@ -159,6 +159,90 @@
           "title": "يمني يحول الماء ثلج بثواني مسحيل يكون طبيعي😳🤯",
           "views": 1405137,
           "channel": "NHAAB - نهاب تيوب"
+        }
+      ]
+    },
+    {
+      "topic_key": "morning-kids-exercise",
+      "timestamp": "2026-11-01T22:28:21.893481+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "الرِّيَاضَةُ الصَّبَاحِيَّةُ لِأَجْسَامٍ قَوِيَّ #shorts",
+      "proven_keywords": [
+        "تمارين الصباح  مع آية 💪 8 دقائق من النشاط والطاقة| 8Minute Morning Exercise for Kids",
+        "أجمل #التمارين_الرياضية مع # عبودي #البيبي_المشاكس  | #نون_تون",
+        "الرياضة #التمارين_الرياضية مع سوسو وميدو  | #نون_تون"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "تمارين الصباح  مع آية 💪 8 دقائق من النشاط والطاقة| 8Minute Morning Exercise for Kids",
+          "views": 1033281,
+          "channel": "صديقتكم آية - Your friend Aya "
+        },
+        {
+          "title": "أجمل #التمارين_الرياضية مع # عبودي #البيبي_المشاكس  | #نون_تون",
+          "views": 6743097,
+          "channel": "نون تون - Noon Toon"
+        },
+        {
+          "title": "الرياضة #التمارين_الرياضية مع سوسو وميدو  | #نون_تون",
+          "views": 16656442,
+          "channel": "نون تون - Noon Toon"
+        }
+      ]
+    },
+    {
+      "topic_key": "hair-and-neatness",
+      "timestamp": "2026-11-01T22:28:55.474154+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "التَّمْشِيطُ وَالأَنَاقَةُ كُلَّ صَبَاح 💇‍♂️👕 #shorts",
+      "proven_keywords": [
+        "تسريحة شعر أنيقة، سهلة و سريعة لجميع المناسبات و للمدرسه 💇🏼‍♀️#trending #shorts #hair #العيد",
+        "رقص ماشا والدب",
+        "التمرين الأقوى لحرق دهون الجسم كامل! 🔥💃"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "تسريحة شعر أنيقة، سهلة و سريعة لجميع المناسبات و للمدرسه 💇🏼‍♀️#trending #shorts #hair #العيد",
+          "views": 1225234,
+          "channel": "lulua life لؤلؤه لايف "
+        },
+        {
+          "title": "رقص ماشا والدب",
+          "views": 6993105,
+          "channel": "ماشا"
+        },
+        {
+          "title": "التمرين الأقوى لحرق دهون الجسم كامل! 🔥💃",
+          "views": 921125,
+          "channel": "فتنس مع ريما | Fit With Rima"
+        }
+      ]
+    },
+    {
+      "topic_key": "helping-the-elderly-cycle-2",
+      "timestamp": "2026-11-01T22:29:21.114389+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "مُسَاعَدَةُ الكِبَارِ وَالعَطْفُ عَلَيْهِم 👵👴 #shorts",
+      "proven_keywords": [
+        "احترام الكبير ومساعدته - مغامرات زين ولين - الحلقة 5",
+        "مقطع فیدیو تعلیمی للأطفال. مساعدة الأم، والتعاون، والنظافة، وترتيب المنزل، واحترام أفراد الأسرة،",
+        "Omar & Hana Arabic | أناشيد و رسوم إسلامية | احترام الكبار"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "احترام الكبير ومساعدته - مغامرات زين ولين - الحلقة 5",
+          "views": 271015,
+          "channel": "زين و لين - Zain & Leen"
+        },
+        {
+          "title": "مقطع فیدیو تعلیمی للأطفال. مساعدة الأم، والتعاون، والنظافة، وترتيب المنزل، واحترام أفراد الأسرة،",
+          "views": 2394,
+          "channel": "𝐊𝐈𝐃𝐎𝐑𝐀"
+        },
+        {
+          "title": "Omar & Hana Arabic | أناشيد و رسوم إسلامية | احترام الكبار",
+          "views": 1418897,
+          "channel": "Omar & Hana Arabic - أناشيد و رسوم دينية للأطفال"
         }
       ]
     }
