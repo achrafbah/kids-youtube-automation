@@ -1,26 +1,16 @@
 {
-  "total_cycles": 11,
+  "total_cycles": 16,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
     "Incorporate high-frequency competitor search terms in first 3 lines.",
     "Adopt conversational question hooks and lively celebratory interjections instead of formal lecture titles to trigger higher completion rates and YouTube Shorts feed pick-up.",
     "Remove heavy diacritics and truncated poetic phrasing from titles, replacing them with high-volume behavioral triggers ('وقت النوم', 'قصص قبل النوم') to align with parent search queries.",
-    "Anchoring health habits around 'بطل' (Hero) and 'سر' (Secret) produces significantly higher algorithmic reach than passive educational naming."
+    "Anchoring health habits around 'بطل' (Hero) and 'سر' (Secret) produces significantly higher algorithmic reach than passive educational naming.",
+    "Replace abstract narrative phrasing with exact high-volume search anchors like 'قطار الحروف' and letter cadences ('أ ب') to capture toddler autoplay and search traffic.",
+    "Anchor alphabet titles directly with high-volume search phrases like 'قطار الحروف' and explicit letter names rather than metaphoric storytelling titles to trigger toddler feed recommendations."
   ],
   "recent_insights": [
-    {
-      "topic_key": "counting-numbers-11-to-15",
-      "timestamp": "2026-10-26T13:02:36.548833+00:00",
-      "hook_pattern": "Energetic preschool cartoon inquiry hook",
-      "suggested_title": null,
-      "proven_keywords": [
-        "مُغَامَرَةُ الأَرْقَام: نَعُدُّ مِنْ 11 إِلَى 15 🚀✨",
-        "كرتون اطفال",
-        "تعليم الروضة"
-      ],
-      "competitors_analyzed": []
-    },
     {
       "topic_key": "counting-numbers-11-to-15",
       "timestamp": "2026-10-26T13:04:29.823744+00:00",
@@ -299,6 +289,153 @@
           "title": "الغضب #كرتون  #cartoon #قصص #love #lovestatus #angry #allah #emotional",
           "views": 358,
           "channel": "Sadek Essam"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-alif-baa-cycle-2",
+      "timestamp": "2026-11-02T15:49:30.473814+00:00",
+      "hook_pattern": "Musical/vehicle pairing pattern: anchoring elementary phonetics (أ ب) to a beloved kinetic theme (قطار الحروف) triggers high repeat preschool views.",
+      "suggested_title": "قطار الحروف: أ ب للأطفال! 🚂🔤 #shorts",
+      "proven_keywords": [
+        "قطار الحروف العربية",
+        "تعليم الحروف العربية للأطفال",
+        "أغنية قطار الحروف",
+        "الحروف العربية الف باء",
+        "انشودة الحروف العربية",
+        "تعليم الحروف للاطفال"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+          "views": 153983706,
+          "channel": "Osratouna tv - قناة أسرتنا"
+        },
+        {
+          "title": "أغنية قطار الحروف العربية - قناة طم طم",
+          "views": 107953997,
+          "channel": "Tam Tam TV"
+        },
+        {
+          "title": "الحروف العربية الف باء تاء ثاء 😊👉🏻😍",
+          "views": 1623700296,
+          "channel": "Harmo"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-taa-thaa-cycle-2",
+      "timestamp": "2026-11-02T15:51:48.047739+00:00",
+      "hook_pattern": "Pairing a beloved visual anchor (قطار الحروف) with immediate phonetic-visual call-and-response (Letter + Animal/Fruit) within the first 2 seconds.",
+      "suggested_title": "قطار الحروف: حرف التاء والثاء! 🍎🦊 #shorts",
+      "proven_keywords": [
+        "قطار الحروف",
+        "الحروف العربية للأطفال",
+        "حرف التاء للأطفال",
+        "حرف الثاء للأطفال",
+        "حروف الهجاء",
+        "تعليم الحروف للأطفال",
+        "أنشودة الحروف"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+          "views": 153984437,
+          "channel": "Osratouna tv - قناة أسرتنا"
+        },
+        {
+          "title": "أغنية قطار الحروف العربية بدون موسيقى",
+          "views": 16549538,
+          "channel": "Tam Tam TV"
+        },
+        {
+          "title": "حرف التاء للأطفال | تاء تِمْسَاح  - برنامج حروف الهجاء مع زكريا",
+          "views": 413383,
+          "channel": "Learn with Zakaria - تعلم مع زكريا"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-jeem-haa-khaa-cycle-2",
+      "timestamp": "2026-11-02T15:57:46.391847+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "قِطَارُ الحُرُوف: الإِخْوَةُ الثَّلَاثَة (ج، ح،  #shorts",
+      "proven_keywords": [
+        "قصة الاخوة الثلاثة ج ح خ",
+        "الاحرف العربية",
+        "قصة الأخوة الثلاثة حرف (ب، ت، ث) للتمييز بينها🤔✍️"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "قصة الاخوة الثلاثة ج ح خ",
+          "views": 13113,
+          "channel": "Helda Wakid"
+        },
+        {
+          "title": "الاحرف العربية",
+          "views": 72801706,
+          "channel": "روضة العلياء النموذجية"
+        },
+        {
+          "title": "قصة الأخوة الثلاثة حرف (ب، ت، ث) للتمييز بينها🤔✍️",
+          "views": 22872,
+          "channel": "qanadilmudiya1"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-dal-dhal-cycle-2",
+      "timestamp": "2026-11-02T16:00:03.344903+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "قِطَارُ الحُرُوف: حَرْفُ الدَّالِ وَالذَّال 🐻🐺 #shorts",
+      "proven_keywords": [
+        "قطار الحروف حرف د ذ سلسلة تعليم الحروف🚂قطار الحروف | تعلم حرف الدال وحرف الذال للأطفال|أغنية تعليمية",
+        "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+        "الحروف العربية للاطفال: أنشودة الخاء والدال والذال"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "قطار الحروف حرف د ذ سلسلة تعليم الحروف🚂قطار الحروف | تعلم حرف الدال وحرف الذال للأطفال|أغنية تعليمية",
+          "views": 7743,
+          "channel": "تلوينة وحكاية"
+        },
+        {
+          "title": "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+          "views": 153984527,
+          "channel": "Osratouna tv - قناة أسرتنا"
+        },
+        {
+          "title": "الحروف العربية للاطفال: أنشودة الخاء والدال والذال",
+          "views": 638,
+          "channel": "فريدة وفيروز كرتون أطفال هادف"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-raa-zay-cycle-2",
+      "timestamp": "2026-11-02T16:00:53.434679+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "قِطَارُ الحُرُوف: حَرْفُ الرَّاءِ وَالزَّاي 🍇🦒 #shorts",
+      "proven_keywords": [
+        "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+        "الاحرف العربية بس على طريقة بابا 🔥😱#shorts #viral #family #trending #fannyvideo #اغاني #تريند",
+        "#الحروف_الهجائية 👶🎵 - أغنية الحروف العربية للأطفال 👧🧒 - The Arabic Alphabet Song 🎤✨"
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+          "views": 153984527,
+          "channel": "Osratouna tv - قناة أسرتنا"
+        },
+        {
+          "title": "الاحرف العربية بس على طريقة بابا 🔥😱#shorts #viral #family #trending #fannyvideo #اغاني #تريند",
+          "views": 19961537,
+          "channel": "عائلة السعدي Alsaadi family"
+        },
+        {
+          "title": "#الحروف_الهجائية 👶🎵 - أغنية الحروف العربية للأطفال 👧🧒 - The Arabic Alphabet Song 🎤✨",
+          "views": 9656888,
+          "channel": "Bubble Bee Edutainment - بابل بيي للتعليم الترفيهي"
         }
       ]
     }
