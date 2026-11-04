@@ -1,5 +1,5 @@
 {
-  "total_cycles": 16,
+  "total_cycles": 17,
   "learned_rules": [
     "Prioritize energetic question hooks under 50 characters.",
     "Eliminate academic series labels like 'برنامج الروضة' from titles; prioritize high-volume search phrases such as 'تعلم الأرقام' followed immediately by '#shorts'.",
@@ -11,38 +11,6 @@
     "Anchor alphabet titles directly with high-volume search phrases like 'قطار الحروف' and explicit letter names rather than metaphoric storytelling titles to trigger toddler feed recommendations."
   ],
   "recent_insights": [
-    {
-      "topic_key": "counting-numbers-11-to-15",
-      "timestamp": "2026-10-26T13:04:29.823744+00:00",
-      "hook_pattern": "Action-oriented educational hook pairing exact numerical ranges with playful emoji anchors instead of formal series titles.",
-      "suggested_title": "تعلم الأرقام من 11 إلى 15 للأطفال 🔢🚀 #shorts",
-      "proven_keywords": [
-        "تعلم الأرقام للأطفال",
-        "أغنية الأرقام العربية",
-        "تعليم الأرقام من 11 إلى 15",
-        "الأرقام العربية للأطفال",
-        "أغاني أطفال تعليمية",
-        "تعليم مرح للأطفال",
-        "حساب وأرقام للروضة"
-      ],
-      "competitors_analyzed": [
-        {
-          "title": "🔢🎵 أغنية الأرقام العربية ⭐✨🔟 تعلم الأرقام العربية 🌟📚🎶🐝Arabic Numbers Song🎈✏️ بابل بيي",
-          "views": 8471801,
-          "channel": "Bubble Bee Edutainment - بابل بيي للتعليم الترفيهي"
-        },
-        {
-          "title": "Numbers 1–10 in English   تعلم الأرقام من 1 إلى 10 بالإنجليزية",
-          "views": 159947,
-          "channel": "English With Yos"
-        },
-        {
-          "title": "3 كرتونات اتمنعت من كرتون نتورك… والسبب غريب! 📺",
-          "views": 935249,
-          "channel": "المحقق اي بوي - Detective E Boy"
-        }
-      ]
-    },
     {
       "topic_key": "dental-hygiene-superhero",
       "timestamp": "2026-10-26T20:03:43.453504+00:00",
@@ -436,6 +404,34 @@
           "title": "#الحروف_الهجائية 👶🎵 - أغنية الحروف العربية للأطفال 👧🧒 - The Arabic Alphabet Song 🎤✨",
           "views": 9656888,
           "channel": "Bubble Bee Edutainment - بابل بيي للتعليم الترفيهي"
+        }
+      ]
+    },
+    {
+      "topic_key": "arabic-letters-seen-sheen-cycle-2",
+      "timestamp": "2026-11-04T00:09:59.056478+00:00",
+      "hook_pattern": "Competitor keyword frequency alignment",
+      "suggested_title": "قِطَارُ الحُرُوف: حَرْفُ السِّينِ وَالشِّين 🐟☀️ #shorts",
+      "proven_keywords": [
+        "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+        "الحلقة الثالثة عشر- حرف السين - س- حكاية حرف السين - قصص للأطفال - حكايات للأطفال - تعليم الحروف",
+        "تعلم معنا الحروف مع قطار الحروف "
+      ],
+      "competitors_analyzed": [
+        {
+          "title": "Learn Arabic Alphabet Train - قطار الحروف العربية للأطفال",
+          "views": 154006399,
+          "channel": "Osratouna tv - قناة أسرتنا"
+        },
+        {
+          "title": "الحلقة الثالثة عشر- حرف السين - س- حكاية حرف السين - قصص للأطفال - حكايات للأطفال - تعليم الحروف",
+          "views": 283717,
+          "channel": "اكتشف العالم مع بندورة"
+        },
+        {
+          "title": "تعلم معنا الحروف مع قطار الحروف ",
+          "views": 7,
+          "channel": "عالم لولى واصحابها"
         }
       ]
     }
